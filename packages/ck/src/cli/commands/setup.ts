@@ -1,9 +1,9 @@
 import { Command } from 'commander';
 import { execFileSync } from 'child_process';
-import { join, dirname } from 'path';
+import { join } from 'path';
 
-// プラグインディレクトリのパスを解決（packages/ck/src/cli/commands → plugins/ck）
-const PLUGIN_DIR = join(dirname(import.meta.dir), '..', '..', '..', 'plugins', 'ck');
+// プラグインディレクトリのパスを解決（packages/ck/src/cli/commands から5段上がって plugins/ck へ）
+const PLUGIN_DIR = join(import.meta.dir, '..', '..', '..', '..', '..', 'plugins', 'ck');
 
 export const setupCommand = new Command('setup')
   .description('Claude Code プラグインを登録し初期設定を行う')
