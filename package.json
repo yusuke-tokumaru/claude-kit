@@ -1,0 +1,5 @@
+{
+  "name": "claude-kit",
+  "private": true,
+  "workspaces": ["packages/*", "plugins/*"]
+}

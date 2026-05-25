@@ -1,0 +1,4 @@
+node_modules/
+bun.lockb
+.claude/works/
+*.db
