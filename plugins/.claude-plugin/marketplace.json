@@ -1,0 +1,17 @@
+{
+  "name": "claude-kit",
+  "owner": {
+    "name": "tokumaru"
+  },
+  "metadata": {
+    "description": "個人用 Claude Code スキル管理・ナレッジグラフ"
+  },
+  "plugins": [
+    {
+      "name": "ck",
+      "version": "0.1.0",
+      "source": "./ck",
+      "description": "個人用 Claude Code スキル管理・ナレッジグラフ"
+    }
+  ]
+}

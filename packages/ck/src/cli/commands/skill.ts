@@ -1,9 +1,9 @@
 import { Command } from 'commander';
 import { join } from 'path';
-import { existsSync, readFileSync, readdirSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, mkdirSync, writeFileSync } from 'fs';
 
-// スキル本体ファイルの格納ディレクトリ
 const SKILLS_DIR = join(import.meta.dir, '../../skills');
+const PLUGIN_SKILLS_DIR = join(import.meta.dir, '../../../../../plugins/ck/skills');
 
 export const skillCommand = new Command('skill').description('スキル管理');
 
@@ -31,4 +31,45 @@ skillCommand
       .filter(d => d.isDirectory())
       .map(d => d.name);
     skills.forEach(s => console.log(s));
+  });
+
+skillCommand
+  .command('copy [name]')
+  .description('スキルをプロジェクトの .claude/skills/ にコピー（カスタマイズ用）')
+  .option('--all', '全スキルをコピー')
+  .action((name: string | undefined, opts: { all?: boolean }) => {
+    const targetBase = join(process.cwd(), '.claude', 'skills');
+
+    const copySkill = (skillName: string) => {
+      const stubPath = join(PLUGIN_SKILLS_DIR, skillName, 'SKILL.md');
+      const bodyPath = join(SKILLS_DIR, skillName, 'body.md');
+
+      if (!existsSync(stubPath) || !existsSync(bodyPath)) {
+        console.error(`スキル "${skillName}" が見つかりません`);
+        return;
+      }
+
+      // スタブの !`ck skill print ...` 行をボディ内容（フロントマター除去済み）で置換
+      const stub = readFileSync(stubPath, 'utf-8');
+      const rawBody = readFileSync(bodyPath, 'utf-8');
+      const bodyContent = rawBody.replace(/^---[\s\S]*?---\n+/, '').trimEnd();
+      const result = stub.replace(/^!`ck skill print [^`]+`\s*$/m, bodyContent);
+
+      const destDir = join(targetBase, skillName);
+      mkdirSync(destDir, { recursive: true });
+      writeFileSync(join(destDir, 'SKILL.md'), result);
+      console.log(`✔ ${skillName} → .claude/skills/${skillName}/SKILL.md`);
+    };
+
+    if (opts.all) {
+      const skills = readdirSync(SKILLS_DIR, { withFileTypes: true })
+        .filter(d => d.isDirectory())
+        .map(d => d.name);
+      skills.forEach(copySkill);
+    } else if (name) {
+      copySkill(name);
+    } else {
+      console.error('スキル名を指定するか --all を使用してください');
+      process.exit(1);
+    }
   });

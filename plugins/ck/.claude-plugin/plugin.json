@@ -1,5 +1,6 @@
 {
   "name": "ck",
   "description": "個人用 Claude Code スキル管理・ナレッジグラフ",
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "author": { "name": "tokumaru" }
 }
