@@ -28,6 +28,18 @@ ck skill list
 bun run packages/ck/src/cli.ts skill list
 ```
 
+## 社内移行時の設定変更
+
+社内 GitLab / npm プライベートレジストリへの移行時は `ck-config.json` を編集する:
+
+| キー | デフォルト | 説明 |
+|---|---|---|
+| `org` | `personal` | 組織名（パッケージ名の `@<org>` 部分） |
+| `registry` | `https://registry.npmjs.org` | npm レジストリ URL |
+| `pluginName` | `claude-kit-plugin` | プラグイン名 |
+
+変更後: `bun install && ck setup` を実行してプラグインを再登録する。
+
 ## アーキテクチャ
 
 ### モノレポ構成
