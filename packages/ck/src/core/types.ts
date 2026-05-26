@@ -11,11 +11,15 @@ export interface BrainNode {
   created_at: string;
 }
 
+// リンク型の許可リスト（Enum相当）
+export const LINK_TYPES = ['relates', 'blocks', 'implements', 'depends-on'] as const;
+export type LinkType = typeof LINK_TYPES[number];
+
 // ノード間のリンク定義
 export interface BrainLink {
   from_id: string;
   to_id: string;
-  type: string;
+  type: LinkType;
 }
 
 // 意思決定記録
