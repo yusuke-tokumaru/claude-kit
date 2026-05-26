@@ -75,3 +75,24 @@ describe('decision operations', () => {
     expect(decisions[0].title).toBe('DB選定');
   });
 });
+
+describe('project_id による分離', () => {
+  test('異なる projectId のノードは互いに検索できない', () => {
+    createNode({ kind: 'note', title: 'プロジェクトA のノード' }, TEST_DB_PATH, 'project-a');
+    createNode({ kind: 'note', title: 'プロジェクトB のノード' }, TEST_DB_PATH, 'project-b');
+
+    const resultsA = searchNodes('ノード', TEST_DB_PATH, 'project-a');
+    const resultsB = searchNodes('ノード', TEST_DB_PATH, 'project-b');
+
+    expect(resultsA).toHaveLength(1);
+    expect(resultsA[0].title).toBe('プロジェクトA のノード');
+    expect(resultsB).toHaveLength(1);
+    expect(resultsB[0].title).toBe('プロジェクトB のノード');
+  });
+
+  test('projectId なしでは全ノードを返す（後方互換）', () => {
+    createNode({ kind: 'note', title: 'グローバルノード' }, TEST_DB_PATH);
+    const results = searchNodes('グローバル', TEST_DB_PATH);
+    expect(results).toHaveLength(1);
+  });
+});

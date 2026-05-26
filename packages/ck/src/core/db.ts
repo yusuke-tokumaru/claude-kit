@@ -11,30 +11,34 @@ const DEFAULT_DB_PATH = join(homedir(), '.ck-brain', 'brain.db');
 function openDb(path = DEFAULT_DB_PATH): Database {
   mkdirSync(dirname(path), { recursive: true });
   const db = new Database(path);
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS nodes (
-      id TEXT PRIMARY KEY,
-      kind TEXT NOT NULL,
-      title TEXT NOT NULL,
-      body TEXT NOT NULL DEFAULT '',
-      tags TEXT NOT NULL DEFAULT '[]',
-      created_at TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS links (
-      from_id TEXT NOT NULL,
-      to_id TEXT NOT NULL,
-      type TEXT NOT NULL,
-      PRIMARY KEY (from_id, to_id, type)
-    );
-    CREATE TABLE IF NOT EXISTS decisions (
-      id TEXT PRIMARY KEY,
-      title TEXT NOT NULL,
-      context TEXT NOT NULL DEFAULT '',
-      decision TEXT NOT NULL,
-      consequences TEXT NOT NULL DEFAULT '',
-      created_at TEXT NOT NULL
-    );
-  `);
+
+  db.run(`CREATE TABLE IF NOT EXISTS nodes (
+    id TEXT PRIMARY KEY,
+    kind TEXT NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL DEFAULT '',
+    tags TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS links (
+    from_id TEXT NOT NULL,
+    to_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    PRIMARY KEY (from_id, to_id, type)
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS decisions (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    context TEXT NOT NULL DEFAULT '',
+    decision TEXT NOT NULL,
+    consequences TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL
+  )`);
+
+  // project_id カラムの追加（既存DBへのマイグレーション、カラム存在時はスキップ）
+  try { db.run('ALTER TABLE nodes ADD COLUMN project_id TEXT'); } catch {}
+  try { db.run('ALTER TABLE decisions ADD COLUMN project_id TEXT'); } catch {}
+
   return db;
 }
 
@@ -42,6 +46,7 @@ function openDb(path = DEFAULT_DB_PATH): Database {
 export function createNode(
   input: { kind: NodeKind; title: string; body?: string; tags?: string[] },
   dbPath?: string,
+  projectId?: string,
 ): BrainNode {
   const db = openDb(dbPath);
   const node: BrainNode = {
@@ -53,26 +58,34 @@ export function createNode(
     created_at: new Date().toISOString(),
   };
   db.run(
-    'INSERT INTO nodes (id, kind, title, body, tags, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-    [node.id, node.kind, node.title, node.body, JSON.stringify(node.tags), node.created_at],
+    'INSERT INTO nodes (id, kind, title, body, tags, created_at, project_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [node.id, node.kind, node.title, node.body, JSON.stringify(node.tags), node.created_at, projectId ?? null],
   );
   return node;
 }
 
 // IDでノードを取得する（存在しない場合はnull）
-export function getNode(id: string, dbPath?: string): BrainNode | null {
+export function getNode(id: string, dbPath?: string, projectId?: string): BrainNode | null {
   const db = openDb(dbPath);
-  const row = db.query('SELECT * FROM nodes WHERE id = ?').get(id) as Record<string, unknown> | null;
+  const sql = projectId
+    ? 'SELECT * FROM nodes WHERE id = ? AND project_id = ?'
+    : 'SELECT * FROM nodes WHERE id = ?';
+  const params: unknown[] = projectId ? [id, projectId] : [id];
+  const row = db.query(sql).get(...(params as [unknown])) as Record<string, unknown> | null;
   if (!row) return null;
   return { ...(row as Omit<BrainNode, 'tags'>), tags: JSON.parse(row.tags as string) };
 }
 
 // タイトル・本文の部分一致でノードを検索する
-export function searchNodes(query: string, dbPath?: string): BrainNode[] {
+export function searchNodes(query: string, dbPath?: string, projectId?: string): BrainNode[] {
   const db = openDb(dbPath);
-  const rows = db
-    .query('SELECT * FROM nodes WHERE title LIKE ? OR body LIKE ? ORDER BY created_at DESC')
-    .all(`%${query}%`, `%${query}%`) as Record<string, unknown>[];
+  const sql = projectId
+    ? 'SELECT * FROM nodes WHERE (title LIKE ? OR body LIKE ?) AND project_id = ? ORDER BY created_at DESC'
+    : 'SELECT * FROM nodes WHERE title LIKE ? OR body LIKE ? ORDER BY created_at DESC';
+  const params: unknown[] = projectId
+    ? [`%${query}%`, `%${query}%`, projectId]
+    : [`%${query}%`, `%${query}%`];
+  const rows = db.query(sql).all(...(params as [unknown])) as Record<string, unknown>[];
   return rows.map(r => ({ ...(r as Omit<BrainNode, 'tags'>), tags: JSON.parse(r.tags as string) }));
 }
 
@@ -81,8 +94,9 @@ export function updateNode(
   id: string,
   input: Partial<Pick<BrainNode, 'title' | 'body' | 'tags'>>,
   dbPath?: string,
+  projectId?: string,
 ): BrainNode | null {
-  const existing = getNode(id, dbPath);
+  const existing = getNode(id, dbPath, projectId);
   if (!existing) return null;
   const updated: BrainNode = { ...existing, ...input };
   const db = openDb(dbPath);
@@ -96,9 +110,13 @@ export function updateNode(
 }
 
 // ノードを削除し、削除成功ならtrueを返す
-export function deleteNode(id: string, dbPath?: string): boolean {
+export function deleteNode(id: string, dbPath?: string, projectId?: string): boolean {
   const db = openDb(dbPath);
-  const result = db.run('DELETE FROM nodes WHERE id = ?', [id]);
+  const sql = projectId
+    ? 'DELETE FROM nodes WHERE id = ? AND project_id = ?'
+    : 'DELETE FROM nodes WHERE id = ?';
+  const params: unknown[] = projectId ? [id, projectId] : [id];
+  const result = db.run(sql, params);
   return result.changes > 0;
 }
 
@@ -125,6 +143,7 @@ export function listLinks(nodeId: string, dbPath?: string): BrainLink[] {
 export function createDecision(
   input: { title: string; context?: string; decision: string; consequences?: string },
   dbPath?: string,
+  projectId?: string,
 ): Decision {
   const db = openDb(dbPath);
   const dec: Decision = {
@@ -136,14 +155,18 @@ export function createDecision(
     created_at: new Date().toISOString(),
   };
   db.run(
-    'INSERT INTO decisions (id, title, context, decision, consequences, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-    [dec.id, dec.title, dec.context, dec.decision, dec.consequences, dec.created_at],
+    'INSERT INTO decisions (id, title, context, decision, consequences, created_at, project_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [dec.id, dec.title, dec.context, dec.decision, dec.consequences, dec.created_at, projectId ?? null],
   );
   return dec;
 }
 
 // 意思決定記録を新しい順で一覧取得する
-export function listDecisions(dbPath?: string): Decision[] {
+export function listDecisions(dbPath?: string, projectId?: string): Decision[] {
   const db = openDb(dbPath);
-  return db.query('SELECT * FROM decisions ORDER BY created_at DESC').all() as Decision[];
+  const sql = projectId
+    ? 'SELECT * FROM decisions WHERE project_id = ? ORDER BY created_at DESC'
+    : 'SELECT * FROM decisions ORDER BY created_at DESC';
+  const params: unknown[] = projectId ? [projectId] : [];
+  return db.query(sql).all(...(params as [])) as Decision[];
 }
