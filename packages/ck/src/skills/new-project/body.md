@@ -14,8 +14,8 @@ description: 新規プロジェクト開始時に使用する。grill-with-docs 
 まず `grill-with-docs` スキルが利用可能かを確認する:
 
 ```bash
-# インストール済みスキルを確認
-claude skill list 2>/dev/null | grep grill-with-docs
+# インストール済みプラグインから確認
+grep -q "grill-with-docs" ~/.claude/plugins/installed_plugins.json 2>/dev/null
 ```
 
 **インストールされていない場合は処理を止めて、以下を表示してからユーザーの確認を待つ:**
