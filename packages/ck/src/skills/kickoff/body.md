@@ -70,8 +70,8 @@ find . -name "*.ts" -o -name "*.js" -o -name "*.py" -o -name "*.go" | grep -v no
 issue の性質から適切なスキルを提案する（自動で呼び出さない）:
 
 - バグ・エラー → `superpowers:systematic-debugging`
-- 設計判断が必要な新機能 → `superpowers:brainstorming`
-- 方向性が明確な実装タスク → `superpowers:writing-plans`
+- 設計の不確定要素がある新機能 → `/discuss`（設計の不確定要素を対話で解消してから `/plan` へ）
+- 方向性が明確な実装タスク → `/plan`（直接プランを作成）
 
 ## 制約
 
