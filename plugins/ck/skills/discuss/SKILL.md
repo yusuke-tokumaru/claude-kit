@@ -6,4 +6,4 @@ allowed-tools: Bash, Read, Grep, Glob, Task, AskUserQuestion, Edit, Write
 argument-hint: <topic>
 ---
 
-!`ck skill print discuss`
+!`ck skill print discuss` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"

@@ -8,11 +8,11 @@
 
 ```bash
 git status --short
-git log origin/HEAD..HEAD --oneline
+git log "$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null || echo refs/remotes/origin/main)"..HEAD --oneline
 ```
 
 - 未コミット変更がある場合は「先にコミットしてください」と伝えて停止する
-- コミットが0件の場合は「main と差分がありません」と伝えて停止する
+- コミットが0件の場合は「デフォルトブランチと差分がありません」と伝えて停止する
 
 ### Step 2: リモートプロバイダーを検出する
 
@@ -26,8 +26,10 @@ git remote get-url origin
 ### Step 3: ブランチとベースを確認する
 
 ```bash
+# デフォルトブランチを検出（設定がない場合は main にフォールバック）
+git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'
 git rev-parse --abbrev-ref HEAD        # 現在のブランチ名
-git log origin/main..HEAD --oneline    # コミット一覧
+git log origin/<デフォルトブランチ>..HEAD --oneline    # コミット一覧
 ```
 
 ブランチ名のスラグ（例: `feat/add-auth` → `add-auth`）を取り出す。
@@ -72,12 +74,12 @@ git log origin/main..HEAD --oneline    # コミット一覧
 
 **GitHub:**
 ```bash
-gh pr create --title "<タイトル>" --body "<本文>" --base main
+gh pr create --title "<タイトル>" --body "<本文>" --base <デフォルトブランチ>
 ```
 
 **GitLab:**
 ```bash
-glab mr create --title "<タイトル>" --description "<本文>" --target-branch main
+glab mr create --title "<タイトル>" --description "<本文>" --target-branch <デフォルトブランチ>
 ```
 
 作成後、PR/MR の URL を表示する。
@@ -85,6 +87,10 @@ glab mr create --title "<タイトル>" --description "<本文>" --target-branch
 ## 制約
 
 - `$ARGUMENTS` にタイトルが指定されている場合は Step 4 のタイトル生成をスキップしてそのまま使用する
-- ベースブランチは `main` をデフォルトとする。`main` が存在しない場合は `master` を使う
+- ベースブランチは `git symbolic-ref refs/remotes/origin/HEAD` で自動検出する。取得できない場合は `main` にフォールバックする
 - 未コミット変更があるときは絶対に PR を作成しない
-- `git push` が必要な場合は実行前にユーザーに確認する
+- `git push` が必要な場合は実行前にユーザーに確認する（プッシュはユーザーの承認後のみ）
+
+## 完了条件
+
+PR/MR の URL をユーザーに表示した時点で完了。

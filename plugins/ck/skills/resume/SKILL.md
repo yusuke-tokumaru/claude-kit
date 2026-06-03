@@ -6,4 +6,4 @@ allowed-tools: Bash(ls *), Read
 argument-hint: "<任意: handoff ファイル名>"
 ---
 
-!`ck skill print resume`
+!`ck skill print resume` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"

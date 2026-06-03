@@ -1,38 +1,15 @@
 ---
 name: new-project
-description: 新規プロジェクト開始時に使用する。grill-with-docs セッションで技術スタックとアーキテクチャを把握し、CONTEXT.md・CLAUDE.md 階層・.claude/docs/INDEX.md を生成する
+description: 新規プロジェクト開始時に使用する。ドメインインタビューで技術スタックとアーキテクチャを把握し、CONTEXT.md・CLAUDE.md 階層・.claude/docs/INDEX.md を生成する
 ---
 
 # new-project
 
-新規プロジェクトのルートで実行する。grill-with-docs の手法で計画を徹底的にインタビューし、**共通理解に達するまで設計ツリーの各分岐を 1 問ずつ** 辿る。各質問には推奨回答を添える。
+新規プロジェクトのルートで実行する。計画のあらゆる側面について徹底的にインタビューし、**共通理解に達するまで設計ツリーの各分岐を 1 問ずつ** 解決する。各質問には推奨回答を添える。
 
 コードベースで回答できる質問は、ユーザーに問わずコードベースを調査して回答する。
 
-## 事前チェック: grill-with-docs のインストール確認
-
-まず `grill-with-docs` スキルが利用可能かを確認する:
-
-```bash
-# インストール済みプラグインから確認
-grep -q "grill-with-docs" ~/.claude/plugins/installed_plugins.json 2>/dev/null
-```
-
-**インストールされていない場合は処理を止めて、以下を表示してからユーザーの確認を待つ:**
-
-```
-grill-with-docs が見つかりません。インストールが必要です。
-
-  npx skills@latest add mattpocock/skills
-
-インストール後、もう一度 /new-project を実行してください。
-```
-
-インストール確認後、以下の Phase 1 に進む。
-
-## Phase 1: grill-with-docs セッション
-
-計画のあらゆる側面について徹底的にインタビューし、共通理解に達するまで設計ツリーの各分岐を解決する。
+## Phase 1: ドメインインタビュー
 
 **1 問ずつ質問し、各回答を受け取ってから次に進む。**
 
@@ -44,7 +21,7 @@ grill-with-docs が見つかりません。インストールが必要です。
 /
 ├── CONTEXT.md          ← 用語集（単一コンテキスト）
 ├── CONTEXT-MAP.md      ← 複数コンテキストがある場合のマップ
-└── docs/adr/           ← アーキテクチャ決定記録
+└── decisions/          ← 決定ログ（/discuss・/new-project が書き込む）
 ```
 
 ファイルが存在しなければ、最初に記録すべき内容が確定した時点で作成する（lazy creation）。
@@ -89,43 +66,63 @@ _Avoid_: {使ってはいけない代替語}
 2. 文脈なしには驚くべき決定（Surprising without context）
 3. 実際のトレードオフの結果（Real trade-off with genuine alternatives）
 
-ADR は `docs/adr/` に `0001-slug.md` 形式で保存。本文は 1 段落でよい。
+重要な決定は `/decisions/<YYYY-MM-DD>-<slug>.md` に ADR-lite 形式で記録する。`decisions/README.md` が存在しない場合は `/discuss` スキルの初期化フローと同一のテンプレートで作成してから追記する。形式は `/discuss` の決定記録ブロックと同一（`## Decision`・`## Consequences`・`## Discussion Log`）。
+
+記録後:
+> 決定事項を `/decisions/<date>-<slug>.md` に追記しました。ステージングの準備ができたら `git add decisions/<date>-<slug>.md` を実行してください。
+
+### Phase 1 の終了
+
+ユーザーが「まとめて」「Phase 2 へ」「終わり」などと言ったとき、または設計ツリーのすべての分岐が解決されたと判断できる自然な区切りで、スキル側から Phase 2 への移行を提案する。
 
 ---
 
-## Phase 2: CLAUDE.md 階層の生成
+## Phase 2: CLAUDE.md の生成
 
-grill-with-docs セッションで得た情報をもとに CLAUDE.md 階層を生成する。
-情報がない項目はセクション自体を省略する。
+Phase 1 のインタビューで得た情報をもとに CLAUDE.md を生成する。情報がない項目はセクション自体を省略する。
 
-### CLAUDE.md（ルート）
+### Phase 2 開始前: プロジェクト構造の検出
+
+以下のコマンドでプロジェクトのディレクトリ構造を調査する:
+
+```bash
+find . -maxdepth 2 -mindepth 1 -type d \
+  -not -name 'node_modules' \
+  -not -name '.git' \
+  -not -path '*/node_modules/*' \
+  -not -path '*/.git/*' \
+  -not -path '*/.next/*' \
+  -not -path '*/dist/*' \
+  -not -path '*/.cache/*' \
+  -not -path '*/.turbo/*'
+```
+
+検出されたディレクトリ一覧をユーザーに提示し、「どのディレクトリに CLAUDE.md を作成しますか？」と確認する。ルートの `CLAUDE.md` は常に生成する（確認不要）。ユーザーが選択したディレクトリのみ以降のステップで生成する。
+
+### CLAUDE.md（ルート）— 常に生成
 
 常にロードされる共通規約:
 
 - **Git 禁止事項**: main/master への直接 push 禁止、force push 禁止など
 - **セキュリティ**: 認証ミドルウェア一覧（どのルートにどのガードが適用されるか表形式で）
 - **開発コマンド**: install / dev / build / test / lint
-- **アーキテクチャ概要**: パッケージ構成と各ディレクトリの役割
+- **アーキテクチャ概要**: 検出されたディレクトリ構成と各ディレクトリの役割
 - **環境変数**: 変数名と用途（値は記載しない）
 
-### src/CLAUDE.md
+### サブディレクトリの CLAUDE.md — ユーザーが選択したもののみ生成
 
-`src/` を操作中にロードされる:
+各ディレクトリの性質に応じて、以下を参考に内容を決定する。情報がない項目は省略する。
 
-- フレームワーク固有のベストプラクティス（例: TanStack Start の SSR/CSR 境界、ローダー/アクションパターン）
+**フロントエンド系ディレクトリ** (`src/`, `app/`, `frontend/`, `web/` など):
+- フレームワーク固有のベストプラクティス（SSR/CSR 境界、ローダー/アクションパターン等）
 - JSX 注意点
-- コンポーネント命名規則
-- ルーティング規則
-- 共有 UI パッケージの import パターン（例: `@ui/*`）
+- コンポーネント命名規則・ルーティング規則
+- 共有 UI パッケージの import パターン
 
-### packages/\<name\>/CLAUDE.md
-
-packages/ 以下の各パッケージに個別ファイルを生成する（例: `packages/core/CLAUDE.md`）:
-
+**バックエンド系ディレクトリ** (`packages/<name>/`, `backend/`, `api/`, `server/` など):
 - ORM ルール（スキーマ定義・マイグレーション方針）
 - サーバー関数パターン（配置・命名・呼び出し規則）
 - 認証詳細（ミドルウェア使い方・session 管理・protected route 作成）
-- API 機能の構成パターン
 - DB スキーマファイルの場所と主要テーブル
 
 ---

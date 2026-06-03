@@ -1,9 +1,9 @@
 ---
 name: ck-note
-description: メモをナレッジグラフに素早く記録する。自動タグ付け・関連ノードへのリンク付き
+description: メモをMarkdownファイルに素早く記録する。ローカル(.notes/)またはグローバル(~/.ck-notes/)を選択可能
 user-invocable: true
-allowed-tools: Bash(ck *), Read
+allowed-tools: Bash(date *), Read, Write, AskUserQuestion
 argument-hint: <メモ内容>
 ---
 
-!`ck skill print ck-note`
+!`ck skill print ck-note` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"

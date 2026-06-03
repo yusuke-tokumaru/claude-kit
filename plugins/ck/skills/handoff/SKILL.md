@@ -6,4 +6,4 @@ allowed-tools: Bash(git *, mkdir *, date *), Read, Write, Task
 argument-hint: "<任意: トピックスラグ>"
 ---
 
-!`ck skill print handoff`
+!`ck skill print handoff` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"

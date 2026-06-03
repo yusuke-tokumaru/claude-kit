@@ -6,4 +6,4 @@ allowed-tools: Bash(pip3 *, python3 *), Read
 argument-hint: "<ファイルパス>"
 ---
 
-!`ck skill print office`
+!`ck skill print office` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"

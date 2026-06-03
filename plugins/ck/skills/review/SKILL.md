@@ -5,4 +5,4 @@ user-invocable: true
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
-!`ck skill print review`
+!`ck skill print review` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"

@@ -6,4 +6,4 @@ allowed-tools: Bash(git *, gh *, glab *), Read, AskUserQuestion
 argument-hint: "[タイトル]"
 ---
 
-!`ck skill print pr`
+!`ck skill print pr` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"

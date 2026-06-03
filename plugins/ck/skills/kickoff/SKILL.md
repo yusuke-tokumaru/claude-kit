@@ -6,4 +6,4 @@ allowed-tools: Bash, Read, Grep, Glob, Task
 argument-hint: <タスク説明>
 ---
 
-!`ck skill print kickoff`
+!`ck skill print kickoff` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"

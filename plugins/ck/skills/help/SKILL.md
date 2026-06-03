@@ -6,4 +6,4 @@ allowed-tools: Bash, Read, Grep, Glob
 argument-hint: <質問>
 ---
 
-!`ck skill print help`
+!`ck skill print help` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"
