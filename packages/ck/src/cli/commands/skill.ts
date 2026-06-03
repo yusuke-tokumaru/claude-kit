@@ -53,7 +53,7 @@ skillCommand
       const stub = readFileSync(stubPath, 'utf-8');
       const rawBody = readFileSync(bodyPath, 'utf-8');
       const bodyContent = rawBody.replace(/^---[\s\S]*?---\n+/, '').trimEnd();
-      const result = stub.replace(/^!`ck skill print [^`]+`\s*$/m, bodyContent);
+      const result = stub.replace(/^!`ck skill print [^`]+`.*$/m, bodyContent);
 
       const destDir = join(targetBase, skillName);
       mkdirSync(destDir, { recursive: true });
@@ -96,7 +96,7 @@ skillCommand
       const stub = readFileSync(stubPath, 'utf-8');
       const rawBody = readFileSync(bodyPath, 'utf-8');
       const bodyContent = rawBody.replace(/^---[\s\S]*?---\n+/, '').trimEnd();
-      const result = stub.replace(/^!`ck skill print [^`]+`\s*$/m, bodyContent);
+      const result = stub.replace(/^!`ck skill print [^`]+`.*$/m, bodyContent);
       writeFileSync(localSkillPath, result);
       console.log(`✔ ${skillName} を最新版に更新しました`);
       return true;

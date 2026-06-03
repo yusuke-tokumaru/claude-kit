@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 概要
 
-個人用 Claude Code プラグインリポジトリ。`ck` CLI・ナレッジグラフ（SQLite）・7つのスキルを提供する。
+個人用 Claude Code プラグインリポジトリ。`ck` CLI・Markdownベースのノート/TODO管理・複数のスキルを提供する。
 
 ## コマンド
 
@@ -60,19 +60,23 @@ plugins/ck/    — Claude Code プラグインスタブ
 
 ### packages/ck 内部構造
 
-- `src/cli.ts` — エントリポイント（Commander で3コマンドを登録）
+- `src/cli.ts` — エントリポイント（Commander で4コマンドを登録）
 - `src/cli/commands/skill.ts` — `ck skill print/list`（`SKILLS_DIR = src/skills/` を参照）
-- `src/cli/commands/brain.ts` — `ck brain node/link/decision` サブコマンド
+- `src/cli/commands/note.ts` — `ck note <content> [--global]`（`.notes/` または `~/.ck-notes/` に書き込み）
+- `src/cli/commands/todo.ts` — `ck todo <content> [--global] [--priority]`（`.notes/todos/` または `~/.ck-notes/todos/` に書き込み）
 - `src/cli/commands/setup.ts` — `claude plugin install plugins/ck` を実行
-- `src/core/db.ts` — Bun SQLite を使ったナレッジグラフ操作。DB は `~/.ck-brain/brain.db`
-- `src/core/types.ts` — `BrainNode`, `BrainLink`, `Decision`, `NodeKind` の型定義
 
-### ナレッジグラフのスキーマ
+### ノート・TODOのストレージ
 
-`~/.ck-brain/brain.db`（グローバル、プロジェクトをまたぐ）に3テーブル：
-- `nodes` — `kind: note | todo | decision | research`、タグは JSON 配列で保存
-- `links` — `(from_id, to_id, type)` の有向リンク
-- `decisions` — 設計判断の専用テーブル
+すべてMarkdownファイル。SQLiteは使用しない。
+
+| 種別 | ローカル（デフォルト） | グローバル（`--global`） |
+|---|---|---|
+| ノート | `.notes/<date>-<slug>.md` | `~/.ck-notes/<date>-<slug>.md` |
+| TODO | `.notes/todos/<date>-<slug>.md` | `~/.ck-notes/todos/<date>-<slug>.md` |
+
+TODOファイルのフロントマターで `status: open/done` を管理する。
+設計判断は `decisions/<date>-<slug>.md` に記録する（`/discuss` スキルが書き込む）。
 
 ### plugins/ck 内部構造
 
