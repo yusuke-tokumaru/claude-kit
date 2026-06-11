@@ -1,5 +1,17 @@
+import { existsSync } from 'fs';
+import { join } from 'path';
+
 export function getDate(): string {
   return new Date().toISOString().split('T')[0];
+}
+
+// 同名ファイルが存在する場合は -2, -3 ... を付けて黙殺上書きを防ぐ
+export function uniqueFilepath(dir: string, basename: string): string {
+  let path = join(dir, `${basename}.md`);
+  for (let i = 2; existsSync(path); i++) {
+    path = join(dir, `${basename}-${i}.md`);
+  }
+  return path;
 }
 
 export function toSlug(text: string): string {

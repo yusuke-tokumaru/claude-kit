@@ -1,5 +1,8 @@
 import { describe, test, expect } from 'bun:test';
-import { getDate, toSlug } from './utils';
+import { mkdtempSync, writeFileSync, rmSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { getDate, toSlug, uniqueFilepath } from './utils';
 
 describe('getDate', () => {
   test('YYYY-MM-DD 形式を返す', () => {
@@ -26,5 +29,28 @@ describe('toSlug', () => {
 
   test('末尾のハイフンを除去する', () => {
     expect(toSlug('hello world-')).not.toMatch(/-$/);
+  });
+});
+
+describe('uniqueFilepath', () => {
+  test('衝突がなければそのままのパスを返す', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ck-test-'));
+    try {
+      expect(uniqueFilepath(dir, '2026-06-11-todo')).toBe(join(dir, '2026-06-11-todo.md'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('衝突時は連番サフィックスを付けて上書きを防ぐ', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ck-test-'));
+    try {
+      writeFileSync(join(dir, '2026-06-11-todo.md'), '');
+      expect(uniqueFilepath(dir, '2026-06-11-todo')).toBe(join(dir, '2026-06-11-todo-2.md'));
+      writeFileSync(join(dir, '2026-06-11-todo-2.md'), '');
+      expect(uniqueFilepath(dir, '2026-06-11-todo')).toBe(join(dir, '2026-06-11-todo-3.md'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

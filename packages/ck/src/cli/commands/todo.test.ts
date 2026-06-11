@@ -44,6 +44,14 @@ describe('ck todo', () => {
     const content = readFileSync(stdout, 'utf-8');
     expect(content).toContain('priority: medium');
   });
+
+  test('同じスラグになる内容を2回登録しても上書きしない', () => {
+    const first = runTodo(['テスト用TODO']).stdout;   // slug: todo
+    const second = runTodo(['検証用TODO']).stdout;    // slug: todo（衝突）
+    expect(second).not.toBe(first);
+    expect(existsSync(first)).toBe(true);
+    expect(existsSync(second)).toBe(true);
+  });
 });
 
 describe('ck todo list', () => {

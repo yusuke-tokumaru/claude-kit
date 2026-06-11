@@ -38,6 +38,14 @@ describe('ck note', () => {
     expect(stdout).toMatch(/\d{4}-\d{2}-\d{2}-my-note-content\.md$/);
   });
 
+  test('同じスラグになる内容を2回登録しても上書きしない', () => {
+    const first = runNote(['テスト用TODO']).stdout;   // slug: todo
+    const second = runNote(['検証用TODO']).stdout;    // slug: todo（衝突）
+    expect(second).not.toBe(first);
+    expect(existsSync(first)).toBe(true);
+    expect(existsSync(second)).toBe(true);
+  });
+
   test('--global フラグで ~/.ck-notes/ に保存する', () => {
     const { stdout, exitCode } = runNote(['global note', '--global']);
     expect(exitCode).toBe(0);

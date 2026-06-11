@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
-import { getDate, toSlug } from '../utils';
+import { getDate, toSlug, uniqueFilepath } from '../utils';
 
 export const noteCommand = new Command('note')
   .description('メモをMarkdownファイルに記録する')
@@ -15,7 +15,7 @@ export const noteCommand = new Command('note')
       ? join(homedir(), '.ck-notes')
       : join(process.cwd(), '.notes');
     mkdirSync(dir, { recursive: true });
-    const filepath = join(dir, `${date}-${slug}.md`);
+    const filepath = uniqueFilepath(dir, `${date}-${slug}`);
     writeFileSync(filepath, `---\ncreated: ${date}\n---\n\n${content}\n`);
     console.log(filepath);
   });

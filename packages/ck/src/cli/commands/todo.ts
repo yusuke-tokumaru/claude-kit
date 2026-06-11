@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { mkdirSync, writeFileSync, readFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
-import { getDate, toSlug } from '../utils';
+import { getDate, toSlug, uniqueFilepath } from '../utils';
 
 function resolveDir(global: boolean | undefined): string {
   return global
@@ -51,7 +51,7 @@ todoCommand
     const slug = toSlug(content);
     const dir = resolveDir(opts.global);
     mkdirSync(dir, { recursive: true });
-    const filepath = join(dir, `${date}-${slug}.md`);
+    const filepath = uniqueFilepath(dir, `${date}-${slug}`);
     writeFileSync(filepath, `---\nstatus: open\ncreated: ${date}\npriority: ${opts.priority}\n---\n\n${content}\n`);
     console.log(filepath);
   });
