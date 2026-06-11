@@ -27,7 +27,7 @@ test -d src && echo "has-src" || echo "no-src"
 **カウントが 3 未満かつ `no-src`** の場合は Greenfield と判定し、サブエージェントをスキップして Step 3 に進む。
 その際、Discussion Briefing の Background に「新規プロジェクト（既存コードなし）」と記載する。
 
-以下のプロンプト構造で Explore サブエージェント（Task, subagent_type: Explore）を1つ起動する:
+以下のプロンプト構造で Explore サブエージェント（起動ツールは環境により `Task` または `Agent`、`subagent_type: Explore`）を1つ起動する:
 
 ```
 あなたは調査専用エージェントです。AskUserQuestion・EnterPlanMode などの対話型ツールは使用しないでください。

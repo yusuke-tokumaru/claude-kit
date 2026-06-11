@@ -10,7 +10,9 @@ git remote get-url origin
 
 URL から自動検出する:
 - `github.com` を含む → GitHub（`gh` CLI を使用）
-- それ以外 → GitLab（`glab` CLI を使用）
+- `gitlab` を含む（セルフホスト含む） → GitLab（`glab` CLI を使用）
+- どちらも含まない（Bitbucket 等） → どちらのサービスかユーザーに確認する。gh / glab のどちらでも扱えない場合は対応していない旨を伝えて停止する
+- リモート未設定 → 「origin が設定されていません」と伝えて停止する
 
 ### GitHub の場合: gh CLI の確認
 
@@ -18,11 +20,7 @@ URL から自動検出する:
 which gh && gh auth status
 ```
 
-`gh` が見つからない場合は、以下のコマンドをユーザーに案内して停止する（sudo を伴うためスキルからは実行しない）:
-```bash
-sudo apt install gh
-gh auth login
-```
+`gh` が見つからない場合は、公式手順（https://github.com/cli/cli#installation — apt の場合は GitHub の公式リポジトリ追加が必要）でのインストールと `gh auth login` を案内して停止する（パッケージリポジトリの追加や sudo を伴うためスキルからは実行しない）。
 
 ### GitLab の場合: glab CLI の確認
 
@@ -30,11 +28,7 @@ gh auth login
 which glab && glab auth status
 ```
 
-`glab` が見つからない場合は、以下のコマンドをユーザーに案内して停止する（sudo を伴うためスキルからは実行しない）:
-```bash
-sudo apt install glab
-glab auth login
-```
+`glab` が見つからない場合は、公式手順（https://gitlab.com/gitlab-org/cli#installation）でのインストールと `glab auth login` を案内して停止する（sudo を伴うためスキルからは実行しない）。
 
 CLI が使えない / 未ログインの場合は案内して停止する。
 

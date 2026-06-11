@@ -1,9 +1,9 @@
 ---
 name: ck-todo
-description: TODOを個別Markdownファイルに記録する。status: open/done で完了管理。ローカル・グローバル選択可能
+description: あとでやる作業を TODO として登録したいときに使用する。「TODO に積んで」「あとでやるから残しておいて」と言われたとき。
 user-invocable: true
-allowed-tools: Bash(date *), Read, Write, AskUserQuestion
-argument-hint: <TODO内容>
+allowed-tools: Bash(ck todo *)
+argument-hint: "<TODO内容> [--global] [--priority high|medium|low]"
 ---
 
 !`ck skill print ck-todo || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"`

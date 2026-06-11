@@ -1,6 +1,6 @@
 ---
 name: help
-description: プロジェクト固有のQ&Aルーター。CLAUDE.md → .claude/docs/ → コードの優先順で回答する
+description: 「このプロジェクトで X はどうやる？」「なぜこうなっている？」というプロジェクト固有の規約・手順・経緯の質問に答えるときに使用する。
 user-invocable: true
 allowed-tools: Bash, Read, Grep, Glob
 argument-hint: <質問>

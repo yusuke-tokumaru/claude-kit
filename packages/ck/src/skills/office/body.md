@@ -11,26 +11,31 @@ Excel・PowerPoint・Word ファイルを解析してテキスト化する。
 - `.xlsx` → Excel（`.xls` は非対応。openpyxl が xlsx のみサポートするため）
 - `.pptx` → PowerPoint
 - `.docx` → Word
-- それ以外 → 「対応していない形式です（xlsx/xls/pptx/docx のみ）」と伝えて終了
+- それ以外 → 「対応していない形式です（xlsx/pptx/docx のみ。旧形式 xls は非対応）」と伝えて終了
 
-## Step 2: 必要ライブラリを確認・インストールする
+## Step 2: 実行環境を決める
 
-**Excel の場合:**
+必要パッケージ: Excel → `openpyxl` / PowerPoint → `python-pptx` / Word → `python-docx`
+
 ```bash
-python3 -c "import openpyxl" 2>/dev/null || pip3 install --user openpyxl -q
+which uv
 ```
 
-**PowerPoint の場合:**
-```bash
-python3 -c "import pptx" 2>/dev/null || pip3 install --user python-pptx -q
-```
-
-**Word の場合:**
-```bash
-python3 -c "import docx" 2>/dev/null || pip3 install --user python-docx -q
-```
+- **uv がある場合（推奨）**: インストール不要。Step 3 のスクリプトを
+  `uv run --with <パッケージ> python - "<ファイルパス>"` で実行する
+- **uv が無い場合**: モジュールの有無を確認し、無ければ次の順で試す（成功した時点で止める）:
+  1. `python3 -c "import <モジュール>" 2>/dev/null` → あれば `python3 -` で実行
+  2. `python3 -m pip install --user <パッケージ> -q`
+  3. PEP 668（`externally-managed-environment`）エラーの場合:
+     `python3 -m pip install --user --break-system-packages <パッケージ> -q`
+  4. pip 自体が無い場合（`No module named pip`）: uv のインストール
+     （`curl -LsSf https://astral.sh/uv/install.sh | sh`）または `sudo apt install python3-pip`
+     をユーザーに案内して停止する（sudo を伴うためスキルからは実行しない）
 
 ## Step 3: ファイルを解析する
+
+以下のスクリプトは `python3 -` で表記する。uv を使う場合は
+`python3 -` を `uv run --with <パッケージ> python -` に読み替える。
 
 ### Excel (.xlsx)
 

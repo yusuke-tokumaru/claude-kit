@@ -1,6 +1,6 @@
 ---
 name: new-project
-description: 新規プロジェクト開始時に使用する。ドメインインタビューで技術スタックとアーキテクチャを把握し、CONTEXT.md・CLAUDE.md 階層・.claude/docs/INDEX.md を生成する
+description: 新規プロジェクトの立ち上げ時、または CLAUDE.md・用語集がまだ整備されていないリポジトリで開発を始めるときに使用する。
 user-invocable: true
 allowed-tools: Bash, Read, Write, Grep, Glob, Task, Skill
 argument-hint: "[プロジェクト名]"

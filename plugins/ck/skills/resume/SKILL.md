@@ -1,6 +1,6 @@
 ---
 name: resume
-description: 直近の handoff ファイルを読み込んで前回の作業コンテキストを復帰する
+description: 前回の作業を再開したいときに使用する。「続きから」「前回どこまでやった？」と言われたとき、セッション開始直後の文脈復帰に。
 user-invocable: true
 allowed-tools: Bash(ls *, git status *, git log *), Read
 argument-hint: "<任意: handoff ファイル名>"

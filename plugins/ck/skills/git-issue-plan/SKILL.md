@@ -1,6 +1,6 @@
 ---
 name: git-issue-plan
-description: GitHub / GitLab の Issue を一覧表示して選択し、実装計画を作成する
+description: "登録済みの Issue から着手するものを選んで作業を始めたいときに使用する。「Issue 一覧を見せて」「Issue #N に着手」と言われたとき。"
 user-invocable: true
 allowed-tools: Bash(gh *), Bash(glab *), Bash(git *), Read, Grep, Glob, Task
 ---
