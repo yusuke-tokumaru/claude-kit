@@ -6,4 +6,4 @@ allowed-tools: Bash, Read, Write, Grep, Glob, Task, Skill
 argument-hint: "[プロジェクト名]"
 ---
 
-!`ck skill print new-project` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"
+!`ck skill print new-project || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"`

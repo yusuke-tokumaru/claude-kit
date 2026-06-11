@@ -1,8 +1,3 @@
----
-name: ck-todo
-description: TODOを個別Markdownファイルに記録する
----
-
 # ck-todo
 
 やるべきことを個別のMarkdownファイルとして記録する。完了時は `status: done` に変更することで管理する。

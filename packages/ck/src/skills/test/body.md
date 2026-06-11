@@ -7,8 +7,14 @@
 ## Step 1: 変更ファイルを把握する
 
 ```bash
-git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only
+# デフォルトブランチとの分岐点からの全変更を対象にする（複数コミットでも漏れない）
+BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
+git diff --name-only "origin/${BASE:-main}...HEAD" 2>/dev/null \
+  || git diff --name-only HEAD~1 HEAD 2>/dev/null \
+  || git diff --name-only
 ```
+
+未コミットの変更がある場合は `git diff --name-only` の結果も対象に加える。
 
 変更ファイルを確認し、テスト対象となる関数・クラス・モジュールを洗い出す。
 

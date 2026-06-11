@@ -1,6 +1,6 @@
 # discuss
 
-方向性を形にするための対話型スキル。固定の手順ではなく、会話の進め方を規定する価値観と原則を定義する。確定した決定事項は `/decisions/<YYYY-MM-DD>-<slug>.md` に記録する（ADR-lite 形式）。
+方向性を形にするための対話型スキル。固定の手順ではなく、会話の進め方を規定する価値観と原則を定義する。確定した決定事項は `decisions/<YYYY-MM-DD>-<slug>.md` に記録する（ADR-lite 形式）。
 
 ## 初期化
 
@@ -52,7 +52,7 @@
 
 ## Git ワークフロー
 
-- `/decisions/` 内のファイルは git 管理する
+- `decisions/` 内のファイルは git 管理する
 - スキルは `git add` を自動実行しない。リマインダーを出力するのみ
 ````
 
@@ -129,7 +129,7 @@ Explore サブエージェントを起動する際は `Task` ツールに `subag
 
 ## 決定事項の記録
 
-ユーザーが決定を承認したら、`/decisions/<YYYY-MM-DD>-<slug>.md` の Discussion Log に `### <date> discuss` セクションを追記する。各決定ブロック：
+ユーザーが決定を承認したら、`decisions/<YYYY-MM-DD>-<slug>.md` の Discussion Log に `### <date> discuss` セクションを追記する。各決定ブロック：
 
 ```markdown
 #### Decision: <一行の要約>
@@ -140,11 +140,11 @@ Explore サブエージェントを起動する際は `Task` ツールに `subag
 
 ファイル先頭の `## Decision` と `## Consequences` のサマリーセクションを最新状態に更新する。
 
-ファイルが存在しない場合は ADR-lite テンプレートで初期化する（`/decisions/README.md` 参照）。
+ファイルが存在しない場合は ADR-lite テンプレートで初期化する（`decisions/README.md` 参照）。
 
 記録後、以下を出力する：
 
-> 決定事項を `/decisions/<date>-<slug>.md` に追記しました。ステージングの準備ができたら `git add decisions/<date>-<slug>.md` を実行してください。
+> 決定事項を `decisions/<date>-<slug>.md` に追記しました。ステージングの準備ができたら `git add decisions/<date>-<slug>.md` を実行してください。
 
 **メモ**（まだ決定ではない重要な洞察）は会話中にインラインテキストとして記録し（ユーザーが「memo: ...」や「メモ：...」と言ったとき）、ラップアップ時にディスカッションログに書き出す。
 
@@ -155,16 +155,16 @@ Explore サブエージェントを起動する際は `Task` ツールに `subag
 1. キャプチャしたメモを `### <date> discuss` セクションの `Memos` 見出し下に追記する。
 2. ファイル先頭の `## Decision` と `## Consequences` のサマリーを更新する。
 3. 以下を出力する：
-   > ディスカッションを `/decisions/<date>-<slug>.md` に記録しました。ステージングの準備ができたら `git add decisions/<date>-<slug>.md` を実行してください。
+   > ディスカッションを `decisions/<date>-<slug>.md` に記録しました。ステージングの準備ができたら `git add decisions/<date>-<slug>.md` を実行してください。
 4. 実装するのに十分な方向性が決まっていれば `/plan <topic>` を提案する。
 
 ## 制約
 
-- `/decisions/` 以外のコードを変更しない（`decisions/README.md` の作成・更新は `decisions/` 内への変更であり許容）。
+- `decisions/` 以外のコードを変更しない（`decisions/README.md` の作成・更新は `decisions/` 内への変更であり許容）。
 - プランモード（`EnterPlanMode`）に入らない。それは `/plan` の責務。
 - `git add` を自動実行しない。
-- `/decisions/` に書かれた決定事項は、下流の `/plan` における制約セットとして権威ある。選好ではなく制約として表現すること。
+- `decisions/` に書かれた決定事項は、下流の `/plan` における制約セットとして権威ある。選好ではなく制約として表現すること。
 
 ## 完了条件
 
-ラップアップが完了し、`/decisions/<date>-<slug>.md` へのアペンドが終わった時点で完了。実装フェーズへの移行準備ができていれば `/plan` を提案する。
+ラップアップが完了し、`decisions/<date>-<slug>.md` へのアペンドが終わった時点で完了。実装フェーズへの移行準備ができていれば `/plan` を提案する。

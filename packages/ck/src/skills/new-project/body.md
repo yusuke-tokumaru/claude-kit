@@ -1,8 +1,3 @@
----
-name: new-project
-description: 新規プロジェクト開始時に使用する。ドメインインタビューで技術スタックとアーキテクチャを把握し、CONTEXT.md・CLAUDE.md 階層・.claude/docs/INDEX.md を生成する
----
-
 # new-project
 
 新規プロジェクトのルートで実行する。計画のあらゆる側面について徹底的にインタビューし、**共通理解に達するまで設計ツリーの各分岐を 1 問ずつ** 解決する。各質問には推奨回答を添える。
@@ -66,10 +61,10 @@ _Avoid_: {使ってはいけない代替語}
 2. 文脈なしには驚くべき決定（Surprising without context）
 3. 実際のトレードオフの結果（Real trade-off with genuine alternatives）
 
-重要な決定は `/decisions/<YYYY-MM-DD>-<slug>.md` に ADR-lite 形式で記録する。`decisions/README.md` が存在しない場合は `/discuss` スキルの初期化フローと同一のテンプレートで作成してから追記する。形式は `/discuss` の決定記録ブロックと同一（`## Decision`・`## Consequences`・`## Discussion Log`）。
+重要な決定は `decisions/<YYYY-MM-DD>-<slug>.md` に ADR-lite 形式で記録する。`decisions/README.md` が存在しない場合は `/discuss` スキルの初期化フローと同一のテンプレートで作成してから追記する。形式は `/discuss` の決定記録ブロックと同一（`## Decision`・`## Consequences`・`## Discussion Log`）。
 
 記録後:
-> 決定事項を `/decisions/<date>-<slug>.md` に追記しました。ステージングの準備ができたら `git add decisions/<date>-<slug>.md` を実行してください。
+> 決定事項を `decisions/<date>-<slug>.md` に追記しました。ステージングの準備ができたら `git add decisions/<date>-<slug>.md` を実行してください。
 
 ### Phase 1 の終了
 

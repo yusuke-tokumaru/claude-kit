@@ -2,8 +2,8 @@
 name: handoff
 description: セッション終了時または中断時に作業状態を保存し、次のセッションで復帰できるようにする
 user-invocable: true
-allowed-tools: Bash(git *, mkdir *, date *), Read, Write, Task
+allowed-tools: Bash(git *, mkdir *, date *), Read, Write, Edit
 argument-hint: "<任意: トピックスラグ>"
 ---
 
-!`ck skill print handoff` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"
+!`ck skill print handoff || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"`

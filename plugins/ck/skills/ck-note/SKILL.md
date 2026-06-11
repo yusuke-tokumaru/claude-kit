@@ -6,4 +6,4 @@ allowed-tools: Bash(date *), Read, Write, AskUserQuestion
 argument-hint: <メモ内容>
 ---
 
-!`ck skill print ck-note` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"
+!`ck skill print ck-note || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"`

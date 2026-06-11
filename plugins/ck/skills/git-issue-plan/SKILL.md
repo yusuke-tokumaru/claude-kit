@@ -5,4 +5,4 @@ user-invocable: true
 allowed-tools: Bash(gh *), Bash(glab *), Bash(git *), Read, Grep, Glob, Task
 ---
 
-!`ck skill print git-issue-plan` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"
+!`ck skill print git-issue-plan || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"`

@@ -1,8 +1,3 @@
----
-name: ck-note
-description: メモをMarkdownファイルに素早く記録する
----
-
 # ck-note
 
 会話中のメモ・気づき・調査結果をMarkdownファイルに記録する。

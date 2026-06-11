@@ -5,4 +5,4 @@ user-invocable: true
 allowed-tools: Bash, Read, Write, Glob, mcp__playwright__*
 ---
 
-!`ck skill print playwright-mcp-e2e` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"
+!`ck skill print playwright-mcp-e2e || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"`

@@ -6,4 +6,4 @@ allowed-tools: Bash, Read, Grep, Glob, Task, AskUserQuestion, EnterPlanMode, Exi
 argument-hint: <task description>
 ---
 
-!`ck skill print plan` || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"
+!`ck skill print plan || echo "ERROR: ck not found. Fix: cd ~/claude-kit && bun link"`

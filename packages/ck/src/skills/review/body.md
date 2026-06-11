@@ -1,8 +1,3 @@
----
-name: review
-description: 実装完了後に型チェック・Lintを実行し、コーディング規約に照らしてコードレビューを行う
----
-
 **位置づけ**: `/test` でテスト全通過を確認してから実行する。
 
 # コードレビュー
@@ -29,7 +24,16 @@ npx eslint .       # または bun lint / pnpm lint
 
 ## Step 2: 差分レビュー
 
-`git diff --name-only HEAD~1 HEAD`（またはコミット前なら `git diff`）で変更ファイルを確認し、以下を検査する。
+デフォルトブランチとの分岐点からの全変更を対象にする（複数コミットでも漏れない）:
+
+```bash
+BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
+git diff --name-only "origin/${BASE:-main}...HEAD" 2>/dev/null \
+  || git diff --name-only HEAD~1 HEAD 2>/dev/null \
+  || git diff --name-only
+```
+
+未コミットの変更がある場合は `git diff` の結果も対象に加え、以下を検査する。
 
 **コード品質:**
 - [ ] 未使用の import・変数がないか
@@ -46,12 +50,15 @@ npx eslint .       # または bun lint / pnpm lint
 - [ ] 変更の意図と実装が一致しているか
 - [ ] エッジケース（空配列・null・境界値）が考慮されているか
 
+**decisions 整合性:**
+- [ ] ブランチスラグに一致する `decisions/` ファイルがある場合、`## Decision` の制約に実装が従っているか（却下された代替案を採用していないか）
+
 ## Step 3: エージェントレビュー（オプション）
 
 以下のいずれかに該当する場合、`superpowers:code-reviewer` エージェントを起動して独立した視点でレビューする:
 - Step 1〜2 で **high / medium** の問題が見つかった場合
 - 変更ファイル数が 5 件超の場合
-- `git diff --stat HEAD~1 HEAD | tail -1` の変更行数（追加+削除の合計）が 200 行超の場合
+- `git diff --stat "origin/${BASE:-main}...HEAD" | tail -1` の変更行数（追加+削除の合計）が 200 行超の場合
 - 新規ファイルを追加している場合（新規機能追加）
 
 ---

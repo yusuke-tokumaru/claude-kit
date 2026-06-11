@@ -1,8 +1,3 @@
----
-name: git-issue-plan
-description: GitHub / GitLab の Issue を一覧表示して選択し、実装計画を作成する
----
-
 # git-issue-plan
 
 リモートに登録された自分向けの Issue を確認し、実装計画（Plan）を作成する。
@@ -23,7 +18,7 @@ URL から自動検出する:
 which gh && gh auth status
 ```
 
-`gh` が見つからない場合:
+`gh` が見つからない場合は、以下のコマンドをユーザーに案内して停止する（sudo を伴うためスキルからは実行しない）:
 ```bash
 sudo apt install gh
 gh auth login
@@ -35,7 +30,7 @@ gh auth login
 which glab && glab auth status
 ```
 
-`glab` が見つからない場合:
+`glab` が見つからない場合は、以下のコマンドをユーザーに案内して停止する（sudo を伴うためスキルからは実行しない）:
 ```bash
 sudo apt install glab
 glab auth login

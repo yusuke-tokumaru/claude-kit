@@ -1,8 +1,3 @@
----
-name: git-issue-create
-description: GitHub / GitLab に新しい Issue を対話的に作成・登録する
----
-
 # git-issue-create
 
 GitHub または GitLab に Issue を対話的に作成する。
@@ -25,7 +20,7 @@ URL から自動検出する:
 which gh && gh auth status
 ```
 
-`gh` が見つからない場合:
+`gh` が見つからない場合は、以下のコマンドをユーザーに案内して停止する（sudo を伴うためスキルからは実行しない）:
 ```bash
 sudo apt install gh
 gh auth login
@@ -37,7 +32,7 @@ gh auth login
 which glab && glab auth status
 ```
 
-`glab` が見つからない場合:
+`glab` が見つからない場合は、以下のコマンドをユーザーに案内して停止する（sudo を伴うためスキルからは実行しない）:
 ```bash
 sudo apt install glab
 glab auth login

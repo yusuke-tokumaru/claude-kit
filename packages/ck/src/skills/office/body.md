@@ -32,14 +32,14 @@ python3 -c "import docx" 2>/dev/null || pip3 install --user python-docx -q
 
 ## Step 3: ファイルを解析する
 
-### Excel (.xlsx / .xls)
+### Excel (.xlsx)
 
 ```bash
-python3 - <<'EOF'
+python3 - "<ファイルパス>" <<'EOF'
 import openpyxl, sys
 
 try:
-    wb = openpyxl.load_workbook("<ファイルパス>", data_only=True)
+    wb = openpyxl.load_workbook(sys.argv[1], data_only=True)
     for sheet_name in wb.sheetnames:
         ws = wb[sheet_name]
         print(f"\n## シート: {sheet_name}  ({ws.max_row}行 × {ws.max_column}列)")
@@ -55,12 +55,12 @@ EOF
 ### PowerPoint (.pptx)
 
 ```bash
-python3 - <<'EOF'
+python3 - "<ファイルパス>" <<'EOF'
 from pptx import Presentation
 import sys
 
 try:
-    prs = Presentation("<ファイルパス>")
+    prs = Presentation(sys.argv[1])
     for i, slide in enumerate(prs.slides, 1):
         print(f"\n## スライド {i}")
         for shape in slide.shapes:
@@ -82,12 +82,12 @@ EOF
 ### Word (.docx)
 
 ```bash
-python3 - <<'EOF'
+python3 - "<ファイルパス>" <<'EOF'
 from docx import Document
 import sys
 
 try:
-    doc = Document("<ファイルパス>")
+    doc = Document(sys.argv[1])
     for para in doc.paragraphs:
         if para.text.strip():
             style = para.style.name
