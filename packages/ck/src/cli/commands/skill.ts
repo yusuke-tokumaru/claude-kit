@@ -16,7 +16,9 @@ skillCommand
       console.error(`スキル "${name}" が見つかりません`);
       process.exit(1);
     }
-    process.stdout.write(readFileSync(bodyPath, 'utf-8'));
+    // メタデータの源泉はスタブ側。body 先頭のフロントマターは出力に含めない
+    const rawBody = readFileSync(bodyPath, 'utf-8');
+    process.stdout.write(rawBody.replace(/^---[\s\S]*?---\n+/, ''));
   });
 
 skillCommand
@@ -31,6 +33,70 @@ skillCommand
       .filter(d => d.isDirectory())
       .map(d => d.name);
     skills.forEach(s => console.log(s));
+  });
+
+skillCommand
+  .command('doctor')
+  .description('スタブ（plugins/）と本体（src/skills/）の整合性を検査')
+  .action(() => {
+    const errors: string[] = [];
+    const warns: string[] = [];
+    const listDirs = (base: string) =>
+      existsSync(base)
+        ? readdirSync(base, { withFileTypes: true })
+            .filter(d => d.isDirectory())
+            .map(d => d.name)
+        : [];
+    const bodies = listDirs(SKILLS_DIR);
+    const stubs = listDirs(PLUGIN_SKILLS_DIR);
+
+    for (const s of stubs) if (!bodies.includes(s)) errors.push(`${s}: スタブに対応する body.md ディレクトリがありません`);
+    for (const b of bodies) if (!stubs.includes(b)) errors.push(`${b}: body に対応するスタブ（plugins/ck/skills/）がありません`);
+
+    for (const s of stubs) {
+      const stubPath = join(PLUGIN_SKILLS_DIR, s, 'SKILL.md');
+      if (!existsSync(stubPath)) {
+        errors.push(`${s}: SKILL.md がありません`);
+        continue;
+      }
+      const raw = readFileSync(stubPath, 'utf-8');
+      const fm = raw.match(/^---\n([\s\S]*?)\n---/);
+      if (!fm) {
+        errors.push(`${s}: スタブにフロントマターがありません`);
+        continue;
+      }
+      const name = fm[1].match(/^name:\s*(.+)$/m)?.[1].trim();
+      if (name !== s) errors.push(`${s}: name "${name}" がディレクトリ名と一致しません`);
+      if (!/^description:\s*\S/m.test(fm[1])) errors.push(`${s}: description がありません`);
+
+      const invoke = raw.match(/^!`ck skill print ([a-z0-9-]+)([^`]*)`/m);
+      if (!invoke) {
+        errors.push(`${s}: 実行行 !\`ck skill print ...\` が見つかりません`);
+      } else {
+        if (invoke[1] !== s) errors.push(`${s}: print 対象 "${invoke[1]}" がディレクトリ名と一致しません`);
+        if (!invoke[2].includes('||')) warns.push(`${s}: フォールバック（|| echo）がバッククォート内にありません`);
+      }
+      if (/^!`[^`]*`\s*\|\|/m.test(raw)) errors.push(`${s}: || フォールバックがバッククォートの外にあります（シェル実行されません）`);
+    }
+
+    for (const b of bodies) {
+      const bodyPath = join(SKILLS_DIR, b, 'body.md');
+      if (!existsSync(bodyPath)) {
+        errors.push(`${b}: body.md がありません`);
+        continue;
+      }
+      if (readFileSync(bodyPath, 'utf-8').startsWith('---\n')) {
+        errors.push(`${b}: body.md にフロントマターがあります（メタデータはスタブに一本化）`);
+      }
+    }
+
+    warns.forEach(w => console.log(`⚠ ${w}`));
+    if (errors.length > 0) {
+      errors.forEach(e => console.error(`✗ ${e}`));
+      console.error(`\n${errors.length} 件のエラー`);
+      process.exit(1);
+    }
+    console.log(`✓ ${stubs.length} スキル — 問題なし${warns.length > 0 ? `（警告 ${warns.length} 件）` : ''}`);
   });
 
 skillCommand

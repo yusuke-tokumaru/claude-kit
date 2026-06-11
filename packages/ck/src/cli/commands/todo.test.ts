@@ -45,3 +45,75 @@ describe('ck todo', () => {
     expect(content).toContain('priority: medium');
   });
 });
+
+describe('ck todo list', () => {
+  test('open の TODO を一覧表示する', () => {
+    runTodo(['write tests']);
+    const { stdout, exitCode } = runTodo(['list']);
+    expect(exitCode).toBe(0);
+    expect(stdout).toContain('write-tests');
+    expect(stdout).toContain('write tests');
+  });
+
+  test('TODO が0件のときはその旨を表示する', () => {
+    const { stdout, exitCode } = runTodo(['list']);
+    expect(exitCode).toBe(0);
+    expect(stdout).toContain('open の TODO はありません');
+  });
+
+  test('done の TODO はデフォルトで表示されない', () => {
+    const created = runTodo(['finished task']).stdout;
+    runTodo(['done', 'finished-task']);
+    const { stdout } = runTodo(['list']);
+    expect(stdout).not.toContain('finished-task');
+    expect(existsSync(created)).toBe(true);
+  });
+
+  test('--all で done も表示される', () => {
+    runTodo(['finished task']);
+    runTodo(['done', 'finished-task']);
+    const { stdout } = runTodo(['list', '--all']);
+    expect(stdout).toContain('finished-task');
+    expect(stdout).toContain('[done]');
+  });
+
+  test('優先度 high が先に表示される', () => {
+    runTodo(['low task', '--priority', 'low']);
+    runTodo(['urgent task', '--priority', 'high']);
+    const { stdout } = runTodo(['list']);
+    const lines = stdout.split('\n');
+    expect(lines[0]).toContain('urgent-task');
+  });
+});
+
+describe('ck todo done', () => {
+  test('status を done にし completed 日付を追記する', () => {
+    const created = runTodo(['complete me']).stdout;
+    const { exitCode } = runTodo(['done', 'complete-me']);
+    expect(exitCode).toBe(0);
+    const content = readFileSync(created, 'utf-8');
+    expect(content).toContain('status: done');
+    expect(content).toMatch(/completed: \d{4}-\d{2}-\d{2}/);
+  });
+
+  test('一致しない名前はエラー終了する', () => {
+    const { exitCode } = runTodo(['done', 'no-such-todo']);
+    expect(exitCode).toBe(1);
+  });
+
+  test('複数一致は候補を表示してエラー終了する', () => {
+    runTodo(['task alpha']);
+    runTodo(['task beta']);
+    const { exitCode } = runTodo(['done', 'task']);
+    expect(exitCode).toBe(1);
+  });
+
+  test('既に done のファイルは変更しない', () => {
+    const created = runTodo(['already done']).stdout;
+    runTodo(['done', 'already-done']);
+    const before = readFileSync(created, 'utf-8');
+    const { exitCode } = runTodo(['done', 'already-done']);
+    expect(exitCode).toBe(0);
+    expect(readFileSync(created, 'utf-8')).toBe(before);
+  });
+});
