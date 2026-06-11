@@ -10,6 +10,8 @@
 
 `superpowers:systematic-debugging` スキルが利用可能な環境では、起動してその規律（Iron Law・仮説の最小検証・3回失敗でアーキテクチャを疑う）を併用する。利用できない環境でも本スキルだけで完結する。
 
+**非対話実行（サブエージェント・自動実行などユーザーに質問できない場合）**: 「ユーザーに確認」「合意したら」のステップは、推奨案を採用して進めてよい。ただし置いた仮定を decisions の記録に `Assumptions` として残し、最終報告で「本来ユーザーに確認すべきだった点」を列挙すること。decisions 記録前に修正しない等の制約は非対話でも緩和されない。
+
 ## Phase 1: 症状の把握と再現
 
 1. エラーメッセージ・症状・再現手順をユーザーから確認する。スタックトレースは最後まで読む
@@ -59,7 +61,7 @@ browser_navigate(<該当URL>)
 
 ### decisions/ への記録（修正前に必ず実行）
 
-`decisions/<YYYY-MM-DD>-<bug-slug>.md` に追記する。ファイルが無ければ ADR-lite テンプレートで初期化する（`decisions/README.md` 参照）:
+`decisions/<YYYY-MM-DD>-<bug-slug>.md` に追記する。ファイルが無ければ ADR-lite テンプレートで初期化する（`decisions/README.md` があれば従い、無ければ以下のブロックで十分）:
 
 ```markdown
 ### <YYYY-MM-DD> debug
