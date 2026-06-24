@@ -55,7 +55,7 @@ git diff --name-only "origin/${BASE:-main}...HEAD" 2>/dev/null \
 
 ## Step 3: エージェントレビュー（オプション）
 
-以下のいずれかに該当する場合、`superpowers:code-reviewer` エージェントを起動して独立した視点でレビューする:
+以下のいずれかに該当する場合、`feature-dev:code-reviewer` エージェント（コードレビュー専用の組み込みエージェント型）を起動して独立した視点でレビューする:
 - Step 1〜2 で **high / medium** の問題が見つかった場合
 - 変更ファイル数が 5 件超の場合
 - `git diff --stat "origin/${BASE:-main}...HEAD" | tail -1` の変更行数（追加+削除の合計）が 200 行超の場合
