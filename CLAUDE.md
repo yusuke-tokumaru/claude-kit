@@ -82,6 +82,7 @@ plugins/ck/    — Claude Code プラグインスタブ
 
 TODOファイルのフロントマターで `status: open/done` を管理する。
 設計判断は `decisions/<date>-<slug>.md` に記録する（`/discuss` スキルが書き込む）。
+QAテストケース台帳は `tests/qa/<機能名>.md`（機能単位）と横断 index `tests/qa/README.md` に記録する（`/qa` スキルが書き込む）。ケース状態は `active`/`要確認`/`obsolete` の3値で、既存ケースは削除せず降格で鮮度管理する。台帳は git 管理されるため、実在の顧客名・案件名・認証情報を書き込まない。
 
 ### plugins/ck 内部構造
 
