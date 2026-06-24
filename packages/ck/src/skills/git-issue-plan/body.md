@@ -81,6 +81,11 @@ Skill tool で `kickoff` スキルを呼び出す。引数:
 
 ## 重要なルール
 
+- このスキルの責務は「Issue の取得 → 選択 → 詳細の要約」まで。コードベース調査と Discussion Briefing の作成は Phase 4 で `kickoff` に委譲し、自身では行わない
 - Phase を順番通りに実行する。スキップ禁止
 - CLI がない / 未ログインの場合は必ず案内で停止する
-- `writing-plans` はユーザーが判断して呼び出す（自動遷移しない）
+- `writing-plans` / `/plan` はユーザーが判断して呼び出す（自動遷移しない）
+
+## 完了条件
+
+Phase 4 で `kickoff` を呼び出し、コードベースサーベイの結果（Discussion Briefing）が提示された時点で完了。次に進むスキル（`/discuss`・`/plan` など）はユーザーが選ぶ。

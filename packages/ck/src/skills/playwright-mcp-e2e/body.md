@@ -78,4 +78,8 @@ test.describe('フォームバリデーション', () => {
 use: { storageState: 'e2e/.auth/user.json' }
 ```
 
-プロジェクト固有の認証情報は `.env` または `playwright.config.ts` から参照する。
+プロジェクト固有の認証情報は `.env` または `playwright.config.ts` から参照する（テストコードに直書きしない）。
+
+## 完了条件
+
+観察した操作を `e2e/{feature}/{scenario}.spec.ts` に保存し、生成したテストを実行して通過することを確認した時点で完了。テストが落ちる場合はセレクタ・待機・前提データを見直してから完了とする（落ちたまま完了宣言しない）。
