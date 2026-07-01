@@ -2,3 +2,4 @@ node_modules/
 .claude/works/
 *.db
 .worktrees/
+docs/superpowers/
