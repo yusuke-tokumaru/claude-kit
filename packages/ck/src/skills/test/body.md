@@ -26,13 +26,13 @@ git diff --name-only "origin/${BASE:-main}...HEAD" 2>/dev/null \
 
 プロジェクトの設定ファイル（`package.json`・`pyproject.toml`・`go.mod` など）を確認して使用中のフレームワークを特定する:
 
-| 検出キー | フレームワーク | 実行コマンド例 |
+| 判定材料 | フレームワーク | 実行コマンド例 |
 |---------|--------------|--------------|
-| `vitest` | Vitest | `npx vitest run` |
-| `jest` | Jest | `npx jest` |
-| `bun test` | Bun test | `bun test` |
-| `pytest` | pytest | `pytest` |
-| `go test` | Go test | `go test ./...` |
+| `package.json` の依存に `vitest` | Vitest | `npx vitest run` |
+| `package.json` の依存に `jest` | Jest | `npx jest` |
+| `bun.lock`（または `bun.lockb`）があり vitest/jest の依存が無い | Bun test | `bun test` |
+| `pyproject.toml` / `requirements*.txt` に `pytest` | pytest | `pytest` |
+| `go.mod` が存在する | Go test | `go test ./...` |
 
 テストコマンドが `package.json` の `scripts` にある場合はそちらを優先する。
 
@@ -45,7 +45,7 @@ git diff --name-only "origin/${BASE:-main}...HEAD" 2>/dev/null \
 
 ## Step 3.5: QA 台帳を参照する（あれば）
 
-`/qa` が設計した台帳がある場合は、それをテスト対象の一次ソースにする。Step 1 で洗い出した機能名から `tests/qa/<機能>.md` を探し、無ければ `tests/qa/README.md`（横断 index）から関連台帳を引く。
+`/qa` が設計した台帳がある場合は、それをテスト対象の一次ソースにする。Step 1 で洗い出した変更ファイル・関数が属する機能を推定し（ディレクトリ名・ルート名・`tests/qa/` 配下の既存台帳ファイル名との照合で判断する）、対応する `tests/qa/<機能>.md` を探す。特定できない・無い場合は `tests/qa/README.md`（横断 index）から関連台帳を引く。
 
 - 存在する場合は読み込み、`状態: active` のケースを**ユニットテストで再現可能なもの**に絞ってテスト対象に変換する（観点・前提/手順・期待結果〈裏側確認含む〉をそのままテストの意図とアサーションに写す）。台帳のケースID（例 `ORD-C1`）は**テスト名/describe の先頭に埋め込む**（例: `test("ORD-C1: 数量0は拒否", …)`）。ID 埋め込みが台帳↔テストの唯一の結合キー（`/qa` Step 5 の規約）であり、`grep -rn ORD-C1` で双方向にたどれる。コメントへの記載で代替しない。
 - `状態: 要確認` のケースは人間判断待ちなのでテスト化せず、ユーザーに「要確認 N 件は台帳側で解決してからテスト化します」と伝える。`obsolete` は対象外。
@@ -97,7 +97,7 @@ Skill: ck:playwright-mcp-e2e
 ```
 ## テスト結果
 - ユニットテスト: ✅ N件 作成・全通過
-- E2E テスト: ✅ 作成済み / ⏭️ スキップ
+- E2E テスト: ✅ 作成済み / ⏭️ スキップ / ❓ 要否未確認（非対話実行のため。対象候補 N 件）
 
 次のステップ: `/review`
 ```
