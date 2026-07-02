@@ -39,7 +39,8 @@ skillCommand
 // 肯定的な使用文のみ拾う（「〜しない」等の否定的言及はパターンに一致させない）
 const TOOL_SIGNALS: Array<{ accepts: string[]; label: string; pattern: RegExp }> = [
   { accepts: ['Skill'], label: '別スキル呼び出し（Skill）', pattern: /`Skill:\s|^Skill:\s|Skill tool|Skill ツール/m },
-  { accepts: ['Task', 'Agent'], label: 'サブエージェント起動（Task/Agent）', pattern: /サブエージェント|subagent_type|エージェント[^\n]{0,30}起動/ },
+  // 「サブエージェントから呼ばれた場合」等の受け身の言及は起動ではないため、起動文脈に限定する
+  { accepts: ['Task', 'Agent'], label: 'サブエージェント起動（Task/Agent）', pattern: /subagent_type|エージェント[^\n]{0,30}起動/ },
   { accepts: ['AskUserQuestion'], label: '選択肢の提示（AskUserQuestion）', pattern: /AskUserQuestion`? で/ },
   { accepts: ['EnterPlanMode'], label: 'プランモード開始（EnterPlanMode）', pattern: /EnterPlanMode`? を呼び出/ },
   { accepts: ['mcp__playwright__'], label: 'Playwright MCP（mcp__playwright__*）', pattern: /mcp__playwright__/ },

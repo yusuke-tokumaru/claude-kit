@@ -44,6 +44,11 @@ describe('toolMismatches: 検出しない（許可済み・否定的言及）', 
     expect(tools('サブエージェントを起動する', 'Bash, Agent')).toEqual([]);
   });
 
+  test('サブエージェントの受け身の言及（呼ばれる側）は Task を要求しない', () => {
+    expect(tools('サブエージェント等から呼ばれ AskUserQuestion が使えない場合は止まらない', 'Bash')).toEqual([]);
+    expect(tools('非対話実行（サブエージェント・自動実行などユーザーに質問できない場合）は推奨案を採用する', 'Bash')).toEqual([]);
+  });
+
   test('mcp__playwright__* のワイルドカード表記を許可として認める', () => {
     expect(tools('`mcp__playwright__browser_navigate` で遷移する', 'Bash, mcp__playwright__*')).toEqual([]);
   });
