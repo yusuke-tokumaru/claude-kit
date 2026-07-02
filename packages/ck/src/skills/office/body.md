@@ -25,7 +25,7 @@ which uv
 
 - **uv がある場合（推奨）**: インストール不要。Step 3 のスクリプトを
   `uv run --with <パッケージ> python - "<ファイルパス>"` で実行する
-- **uv が無い場合**: モジュールの有無を確認し、無ければ次の順で試す（成功した時点で止める）:
+- **uv が無い場合**: モジュールの有無を確認し、無ければ次の順で試す（成功した時点で止める）。`pip install` はユーザー環境への書き込みを伴うため、実行前に「<パッケージ> を pip でユーザー環境にインストールします」と1行伝えてから実行する:
   1. `python3 -c "import <モジュール>" 2>/dev/null` → あれば `python3 -` で実行
   2. `python3 -m pip install --user <パッケージ> -q`
   3. PEP 668（`externally-managed-environment`）エラーの場合:
@@ -114,26 +114,36 @@ EOF
 ```bash
 python3 - "<ファイルパス>" <<'EOF'
 from docx import Document
+from docx.table import Table
 import re
 import sys
 
 try:
     doc = Document(sys.argv[1])
-    for para in doc.paragraphs:
-        if para.text.strip():
-            style = para.style.name
+    # 文書内の出現順を保って段落と表を出力する（表がどの見出し配下にあるかを維持する）。
+    # iter_inner_content は python-docx 1.1+。無い旧環境では段落→表の順に縮退し、その旨を注記する
+    if hasattr(doc, "iter_inner_content"):
+        blocks = doc.iter_inner_content()
+    else:
+        print("> 注: python-docx が古いため表は本文の後にまとめて出力される（文書内の位置とは異なる）")
+        blocks = list(doc.paragraphs) + list(doc.tables)
+    tbl_n = 0
+    for block in blocks:
+        if isinstance(block, Table):
+            tbl_n += 1
+            print(f"\n### 表 {tbl_n}")
+            for row in block.rows:
+                print(" | ".join(cell.text.strip() for cell in row.cells))
+        elif block.text.strip():
+            # style が None の段落（スタイル未解決）は本文扱い — 1段落の異常で全体を落とさない
+            style = block.style.name if block.style else ""
             # 見出しスタイルは英語 "Heading 1" / 日本語 "見出し 1" の両方に対応する。
             # レベル数字が取れないスタイル名（"Heading" 単独等）は本文として出力し、例外で全体を落とさない
             m = re.match(r"^(?:Heading|見出し)\s*(\d+)$", style)
             if m:
-                print(f"\n{'#' * int(m.group(1))} {para.text}")
+                print(f"\n{'#' * int(m.group(1))} {block.text}")
             else:
-                print(para.text)
-
-    for i, table in enumerate(doc.tables, 1):
-        print(f"\n### 表 {i}")
-        for row in table.rows:
-            print(" | ".join(cell.text.strip() for cell in row.cells))
+                print(block.text)
 except Exception as e:
     print(f"ERROR: {e}", file=sys.stderr)
     sys.exit(1)
