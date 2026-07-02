@@ -74,6 +74,7 @@ ck setup
 | 調査 | `/debug` | バグ・エラー・テスト失敗の根本原因を体系的に特定 |
 | テスト | `/test` | 実装完了後にユニットテストを作成する |
 | QA | `/qa` | L1〜L8 の検証レンズでテストケース・QA 観点を洗い出す |
+| 移行 | `/migrate-verify` | 旧新データの突合（件数・キー・値・形式）を読み取り専用で機械実行 |
 | E2E | `/playwright-mcp-e2e` | UI の E2E テストを作成する |
 | レビュー | `/review` | 自分の差分を PR 前に自己レビュー（型・Lint・品質・整合性） |
 | レビュー | `/review-others` | 他者の PR/MR・コードをレビュワーとして監査 |
@@ -96,6 +97,7 @@ ck setup
 | `/help` | プロジェクト固有の規約・手順・経緯を調べる | （CLAUDE.md → `.claude/docs/` → コードの順で検索） |
 | `/new-project` | 新規プロジェクトの CLAUDE.md・用語集を整備 | プロジェクトルート |
 | `/office` | Excel / PowerPoint / Word の内容を確認・テキスト化 | — |
+| `/spec-import` | 仕様書を構造化 Markdown 仕様に取り込む（`/office` の後工程） | `specs/` |
 
 記録ファイルの主な置き場所:
 
@@ -104,9 +106,11 @@ ck setup
 | 設計判断 | `decisions/<日付>-<slug>.md` | `/discuss`・`/plan` |
 | QA テストケース台帳 | `tests/qa/<機能名>.md`（横断 index は `tests/qa/README.md`） | `/qa` |
 | 他者コードのレビュー結果 | `reviews/<日付>-<slug>.md` | `/review-others` |
+| 取込済み仕様 | `specs/<機能名>.md`（index は `specs/README.md`） | `/spec-import` |
+| 移行突合レポート | `tests/qa/recon/<日付>-<機能名>.md` | `/migrate-verify` |
 | 引き継ぎ | `.claude/works/handoffs/` | `/handoff` |
 
-> `.notes/`・`decisions/`・`reviews/`・`tests/qa/` は git 管理（共有）されます。実在の顧客名・案件名・認証情報は書き込まないでください（各スキルが検知時に伏字化を提案します）。
+> `.notes/`・`decisions/`・`reviews/`・`tests/qa/`・`specs/` は git 管理（共有）されます。実在の顧客名・案件名・認証情報は書き込まないでください（各スキルが検知時に伏字化を提案します）。
 
 ---
 
