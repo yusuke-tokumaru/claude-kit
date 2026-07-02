@@ -2,7 +2,7 @@
 name: help
 description: 「このプロジェクトで X はどうやる？」「なぜこうなっている？」というプロジェクト固有の規約・手順・経緯の質問に答えるときに使用する。
 user-invocable: true
-allowed-tools: Bash, Read, Grep, Glob
+allowed-tools: Bash(grep *, ls *, cat *), Read, Grep, Glob
 argument-hint: <質問>
 ---
 

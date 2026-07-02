@@ -39,18 +39,29 @@ which uv
 
 ### Excel (.xlsx)
 
+シートあたりの出力上限（既定 200 行）をスクリプト側で打ち切る。巨大ファイルの全行出力はコンテキストを食い潰すため、省略が出た場合は必要な範囲を確認してから第2引数で上限を上げて再実行する。
+
 ```bash
-python3 - "<ファイルパス>" <<'EOF'
+python3 - "<ファイルパス>" [上限行数] <<'EOF'
 import openpyxl, sys
+
+MAX_ROWS = int(sys.argv[2]) if len(sys.argv) > 2 else 200  # シートあたりの出力上限（非空行ベース）
 
 try:
     wb = openpyxl.load_workbook(sys.argv[1], data_only=True)
     for sheet_name in wb.sheetnames:
         ws = wb[sheet_name]
         print(f"\n## シート: {sheet_name}  ({ws.max_row}行 × {ws.max_column}列)")
+        printed = omitted = 0
         for row in ws.iter_rows(values_only=True):
             if any(v is not None for v in row):
-                print("\t".join(str(v) if v is not None else "" for v in row))
+                if printed < MAX_ROWS:
+                    print("\t".join(str(v) if v is not None else "" for v in row))
+                    printed += 1
+                else:
+                    omitted += 1
+        if omitted:
+            print(f"…非空行 {omitted} 行を省略（全件必要なら上限行数を第2引数に指定して再実行）")
 except Exception as e:
     print(f"ERROR: {e}", file=sys.stderr)
     sys.exit(1)
@@ -114,7 +125,7 @@ EOF
 
 ## Step 4: 解析結果を提示する
 
-出力を整形してユーザーに提示する。行数が多い場合（100行超）は先頭 50 行と末尾 10 行を示し、全件表示が必要か確認する。
+出力を整形してユーザーに提示する。行数が多い場合（100行超）は先頭 50 行と末尾 10 行を示し、全件表示が必要か確認する。Excel はスクリプト側でシートあたり 200 行（既定）に打ち切っているため、省略行の表示があれば「どの範囲が必要か」を確認してから上限を上げて再実行する。
 
 ファイルの概要として以下を先頭に表示する:
 - ファイル名
