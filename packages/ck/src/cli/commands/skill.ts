@@ -45,6 +45,13 @@ const TOOL_SIGNALS: Array<{ accepts: string[]; label: string; pattern: RegExp }>
   { accepts: ['mcp__playwright__'], label: 'Playwright MCP（mcp__playwright__*）', pattern: /mcp__playwright__/ },
 ];
 
+// body の記述から要求されるのに allowed-tools に無いツールを返す（doctor のツール整合検査本体）
+export function toolMismatches(body: string, allowedTools: string): Array<{ tool: string; label: string }> {
+  return TOOL_SIGNALS.filter(
+    sig => sig.pattern.test(body) && !sig.accepts.some(t => allowedTools.includes(t))
+  ).map(sig => ({ tool: sig.accepts[0], label: sig.label }));
+}
+
 skillCommand
   .command('doctor')
   .description('スタブ（plugins/）と本体（src/skills/）の整合性を検査')
@@ -93,10 +100,8 @@ skillCommand
       const bodyPath = join(SKILLS_DIR, s, 'body.md');
       if (allowedTools && existsSync(bodyPath)) {
         const body = readFileSync(bodyPath, 'utf-8');
-        for (const sig of TOOL_SIGNALS) {
-          if (sig.pattern.test(body) && !sig.accepts.some(t => allowedTools.includes(t))) {
-            errors.push(`${s}: body が${sig.label}を使うのに allowed-tools にありません`);
-          }
+        for (const m of toolMismatches(body, allowedTools)) {
+          errors.push(`${s}: body が${m.label}を使うのに allowed-tools にありません`);
         }
       }
     }
