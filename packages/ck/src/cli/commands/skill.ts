@@ -35,6 +35,16 @@ skillCommand
     skills.forEach(s => console.log(s));
   });
 
+// body が使うツールとスタブ allowed-tools の乖離を検出するシグナル。
+// 肯定的な使用文のみ拾う（「〜しない」等の否定的言及はパターンに一致させない）
+const TOOL_SIGNALS: Array<{ accepts: string[]; label: string; pattern: RegExp }> = [
+  { accepts: ['Skill'], label: '別スキル呼び出し（Skill）', pattern: /`Skill:\s|^Skill:\s|Skill tool|Skill ツール/m },
+  { accepts: ['Task', 'Agent'], label: 'サブエージェント起動（Task/Agent）', pattern: /サブエージェント|subagent_type|エージェント[^\n]{0,30}起動/ },
+  { accepts: ['AskUserQuestion'], label: '選択肢の提示（AskUserQuestion）', pattern: /AskUserQuestion`? で/ },
+  { accepts: ['EnterPlanMode'], label: 'プランモード開始（EnterPlanMode）', pattern: /EnterPlanMode`? を呼び出/ },
+  { accepts: ['mcp__playwright__'], label: 'Playwright MCP（mcp__playwright__*）', pattern: /mcp__playwright__/ },
+];
+
 skillCommand
   .command('doctor')
   .description('スタブ（plugins/）と本体（src/skills/）の整合性を検査')
@@ -77,6 +87,18 @@ skillCommand
         if (!invoke[2].includes('||')) warns.push(`${s}: フォールバック（|| echo）がバッククォート内にありません`);
       }
       if (/^!`[^`]*`\s*\|\|/m.test(raw)) errors.push(`${s}: || フォールバックがバッククォートの外にあります（シェル実行されません）`);
+
+      // body が要求するツールが allowed-tools に揃っているか（ヒューリスティック検査）
+      const allowedTools = fm[1].match(/^allowed-tools:\s*(.+)$/m)?.[1] ?? '';
+      const bodyPath = join(SKILLS_DIR, s, 'body.md');
+      if (allowedTools && existsSync(bodyPath)) {
+        const body = readFileSync(bodyPath, 'utf-8');
+        for (const sig of TOOL_SIGNALS) {
+          if (sig.pattern.test(body) && !sig.accepts.some(t => allowedTools.includes(t))) {
+            errors.push(`${s}: body が${sig.label}を使うのに allowed-tools にありません`);
+          }
+        }
+      }
     }
 
     for (const b of bodies) {
