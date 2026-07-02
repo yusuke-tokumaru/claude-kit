@@ -6,6 +6,8 @@
 
 コードベースで回答できる質問は、ユーザーに問わずコードベースを調査して回答する。
 
+**非対話実行時**: 本スキルはインタビューが本質のため非対話では実行できない。「対話セッションで `/new-project` を起動してください」と報告して停止する（推定で CLAUDE.md・CONTEXT.md を生成しない）。
+
 ## Phase 1: ドメインインタビュー
 
 **1 問ずつ質問し、各回答を受け取ってから次に進む。**
@@ -76,7 +78,59 @@ _Avoid_: {使ってはいけない代替語}
 2. 文脈なしには驚くべき決定（Surprising without context）
 3. 実際のトレードオフの結果（Real trade-off with genuine alternatives）
 
-重要な決定は `decisions/<YYYY-MM-DD>-<slug>.md` に ADR-lite 形式で記録する。`decisions/README.md` が存在しない場合は `/discuss` スキルの初期化フローと同一のテンプレートで作成してから追記する（テンプレート本文は `ck skill print discuss` の「初期化」節を参照する）。形式は `/discuss` の決定記録ブロックと同一（`## Decision`・`## Consequences`・`## Discussion Log`）。
+重要な決定は `decisions/<YYYY-MM-DD>-<slug>.md` に ADR-lite 形式で記録する。`decisions/README.md` が存在しない場合は以下のテンプレートで作成してから追記する（`/discuss` の初期化テンプレートと同一。両スキルどちらが先に走っても同じ README になる）:
+
+````markdown
+# Decisions ログ
+
+このディレクトリはプロジェクトの決定事項と議論のログを保持する。トピックごとに1つの Markdown ファイルを作成し、作業が進むにつれてコンテキストを蓄積していく。
+
+## ファイル名規則
+
+```
+<YYYY-MM-DD>-<slug>.md
+```
+
+- `<YYYY-MM-DD>`: トピックを開いた日付
+- `<slug>`: トピックの kebab-case 短縮識別子
+
+注意: 既存ファイルはリネームしない。トピックごとに1ファイル、後から追記する。
+
+## セクションテンプレート（ADR-lite）
+
+```markdown
+# <トピックタイトル>
+
+## Context
+<背景 — なぜ議論するのか>
+
+## Decision
+<確定した制約の箇条書き>
+
+## Consequences
+<下流への影響>
+
+## Discussion Log
+
+### <YYYY-MM-DD> discuss
+#### Decision: <一行の要約>
+- **Constraint**: <今後の制約として確定したこと>
+- **Why**: <理由>
+- **Rejected alternatives**: <却下した選択肢（あれば）>
+```
+
+## 追記ルール
+
+- `/discuss` が `discuss` セクションを追記し、各決定をサブブロックとして記録する
+- ファイルが存在しない場合は上記テンプレートで初期化してから追記する
+
+## Git ワークフロー
+
+- `decisions/` 内のファイルは git 管理する
+- スキルは `git add` を自動実行しない。リマインダーを出力するのみ
+````
+
+決定記録の形式は `/discuss` の決定記録ブロックと同一（`## Decision`・`## Consequences`・`## Discussion Log`）。
 
 **秘匿情報ガード**: CONTEXT.md・decisions/・CLAUDE.md はいずれも git 管理される。ドメインインタビューでは実在の顧客名・案件名が出やすいが、記録時は一般化した表現に置き換える（例: 「○○株式会社の受注フロー」→「顧客企業の受注フロー」）。認証情報・API キー・社内 URL も書き込まない。
 
@@ -173,3 +227,9 @@ Phase 2 完了後、以下のテンプレートで生成する。**表の `src/`
 - CONTEXT.md・decisions/・CLAUDE.md に実在の顧客名・案件名・認証情報を書き込まない（Phase 1 の秘匿情報ガード）
 - 「当たり前のこと」は書かない（「エラーハンドリングをしましょう」「テストを書きましょう」等）
 - 既存の CLAUDE.md がある場合は上書きせず **差分提案** として出力する（「追加を提案するセクション」と「変更を提案する既存記述」を分けてチャットに提示し、適用の可否はユーザーが判断する。ファイルへの書き込みは承認後のみ）
+
+## 完了条件
+
+Phase 3 の成果物（CLAUDE.md・CONTEXT.md・`.claude/docs/INDEX.md`・必要なら decisions/）を生成または差分提案し、生成ファイルのステージング案内（`git add CLAUDE.md CONTEXT.md .claude/docs/` 等。`git add` は自動実行しない）を出した時点で完了。
+
+**完了後の導線**: 立ち上げが済んだら最初のタスクは `/kickoff <タスク説明>` から始める（kickoff が Greenfield 判定で本スキルに誘導する導線の逆向き）。設計の不確定要素が残っていれば `/discuss` を案内する。
