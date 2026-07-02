@@ -2,7 +2,7 @@
 name: plan
 description: 詳細な実装プランを作成する際に使用する。/discuss が収束した後、またはタスクの方向性が明確なときに起動する。
 user-invocable: true
-allowed-tools: Bash, Read, Grep, Glob, Task, AskUserQuestion, EnterPlanMode, ExitPlanMode, Edit, Write, Skill
+allowed-tools: Bash(git branch:*), Read, Grep, Glob, Task, Agent, AskUserQuestion, EnterPlanMode, ExitPlanMode, Edit, Write, Skill
 argument-hint: <task description>
 ---
 
