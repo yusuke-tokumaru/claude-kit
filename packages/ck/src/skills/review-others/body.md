@@ -41,6 +41,8 @@ git diff --name-only "origin/${BASE:-main}...HEAD" 2>/dev/null \
   || git diff --name-only
 ```
 
+`HEAD~1` へのフォールバックが発動した場合は**直近1コミットしか見ていない**（「複数コミットでも漏れない」が成立していない）。縮退したことをレビュー報告の冒頭に明記し、可能なら `git fetch origin` 後に再実行する。
+
 4. 差分だけでなく、変更が依存する**関連レイヤー**（呼び出し元・スキーマ・認可ヘルパー）も精読対象に含める。
 
 ## Step 2-B: 対象把握（0からモード）
@@ -107,7 +109,7 @@ grep -rln "pgTable\|sqliteTable\|defineTable" <対象パス>                    
 
 ## Step 5: 検証手法
 
-**`.validator` の data が any に劣化していないかを tsc で実証**（型推論された any は `noImplicitAny` で捕捉できない）:
+**`.validator` の data が any に劣化していないかを tsc で実証**（型推論された any は `noImplicitAny` で捕捉できない）。この検証は対象ツリーへの checkout が成立している場合のみ実行できる。Step 2-A で diff のみ取得に縮退した場合は本 Step をスキップし、報告に「tsc 検証未実施（checkout 不能のため）」と明記する:
 
 ```ts
 // 検証ファイルは import 解決と tsconfig 適用のため「対象リポジトリ内」（tsconfig の include 範囲、

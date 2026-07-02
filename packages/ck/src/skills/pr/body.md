@@ -18,7 +18,7 @@ git rev-parse --abbrev-ref HEAD
 git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'
 ```
 
-デフォルトブランチの検出が空の場合は、`git branch -r` の一覧から実在するデフォルトブランチ（`origin/main`・`origin/master` 等）を特定する。特定したデフォルトブランチで差分を確認する:
+デフォルトブランチの検出が空の場合は、`git branch -r` の一覧から実在するデフォルトブランチ（`origin/main`・`origin/master` 等）を特定する。`git branch -r` も空（fetch 未実行等）の場合は `git fetch origin` を実行してから再確認し、それでも特定できなければベースブランチ名をユーザーに確認する。特定したデフォルトブランチで差分を確認する:
 
 ```bash
 git log origin/<デフォルトブランチ>..HEAD --oneline
