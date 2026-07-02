@@ -2,7 +2,7 @@
 name: pr
 description: レビュー通過後、プルリクエスト / マージリクエストを作成したいときに使用する。
 user-invocable: true
-allowed-tools: Bash(git *, gh *, glab *), Read, AskUserQuestion
+allowed-tools: Bash(git *, gh *, glab *), Read, Grep, Glob, AskUserQuestion
 argument-hint: "[タイトル]"
 ---
 
