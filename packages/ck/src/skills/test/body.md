@@ -87,9 +87,9 @@ Step 2 で特定したコマンドでテストを実行する。
 - 「追加する（ブラウザ操作が必要な機能）」
 - 「スキップする（APIのみ・ロジックのみ）」
 
-「追加する」を選んだ場合は `playwright-mcp-e2e` スキルを呼び出す:
+「追加する」を選んだ場合は `ck:playwright-mcp-e2e` スキル（完全修飾名）を呼び出す:
 ```
-Skill: playwright-mcp-e2e
+Skill: ck:playwright-mcp-e2e
 ```
 
 ## Step 7: 完了報告
