@@ -12,7 +12,7 @@ git rev-parse --abbrev-ref HEAD
 git log "$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null || echo refs/remotes/origin/main)"..HEAD --oneline
 ```
 
-- 未コミット変更がある場合は「先にコミットしてください」と伝えて停止する
+- 未コミット変更がある場合は「先にコミットしてください」と伝えて停止する（論理単位への分割コミットは `/commit` で行える）
 - コミットが0件の場合は「デフォルトブランチと差分がありません」と伝えて停止する
 - 現在のブランチがデフォルトブランチ（main / master 等）の場合は「フィーチャーブランチを作成してください」と伝えて停止する
 
