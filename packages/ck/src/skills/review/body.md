@@ -27,11 +27,14 @@ npx eslint .       # または bun lint / pnpm lint
 デフォルトブランチとの分岐点からの全変更を対象にする（複数コミットでも漏れない）:
 
 ```bash
+# BASE の検出と使用は必ず同一の Bash 呼び出しで行う（シェル変数は呼び出し間で持続しない）
 BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
 git diff --name-only "origin/${BASE:-main}...HEAD" 2>/dev/null \
   || git diff --name-only HEAD~1 HEAD 2>/dev/null \
   || git diff --name-only
 ```
+
+デフォルトブランチが main / master 以外でフォールバックが正しく効かない場合は、`git branch -r` の一覧から実在するデフォルトブランチを特定して `origin/<ブランチ>...HEAD` を使う。
 
 未コミットの変更がある場合は `git diff` の結果も対象に加え、以下を検査する。
 
@@ -59,7 +62,7 @@ git diff --name-only "origin/${BASE:-main}...HEAD" 2>/dev/null \
 - [ ] リトライ・再実行で冪等か。コミット境界・ロック粒度は適切か
 
 **decisions 整合性:**
-- [ ] ブランチスラグに一致する `decisions/` ファイルがある場合、`## Decision` の制約に実装が従っているか（却下された代替案を採用していないか）
+- [ ] ブランチスラグに一致する `decisions/` ファイルがある場合、`## Decision` の制約に実装が従っているか（却下された代替案を採用していないか）。照合は、ブランチ名から型プレフィックス（`feat/`・`fix/` 等）を除いた部分を slug とみなし、`decisions/<date>-<slug>.md` の日付を無視して slug 部分と突き合わせる（例: `fix/login-timeout` → `decisions/*-login-timeout.md`）
 
 ## Step 2.5: QA台帳の回帰トリガー突合
 
@@ -81,7 +84,8 @@ ls tests/qa/*.md 2>/dev/null   # 台帳の有無を確認
 以下のいずれかに該当する場合、`feature-dev:code-reviewer` エージェント（コードレビュー専用の組み込みエージェント型）を起動して独立した視点でレビューする:
 - Step 1〜2 で **high / medium** の問題が見つかった場合
 - 変更ファイル数が 5 件超の場合
-- `git diff --stat "origin/${BASE:-main}...HEAD" | tail -1` の変更行数（追加+削除の合計）が 200 行超の場合
+- 変更行数（追加+削除の合計）が 200 行超の場合。`BASE` は Step 2 から持ち越せないため同一コマンド内で再取得する:
+  `BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'); git diff --stat "origin/${BASE:-main}...HEAD" | tail -1`
 - 新規ファイルを追加している場合（新規機能追加）
 
 ---
