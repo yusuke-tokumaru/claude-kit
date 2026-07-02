@@ -2,7 +2,7 @@
 name: qa
 description: テストケース・QA観点の洗い出しが必要なときに使用する。「テストケースを作って」「QA観点を出して」「移行データの確認項目を洗い出して」と言われたとき。正常系に偏らずL1〜L8 の検証レンズ（WHO軸・並行/整合などの非機能観点を含む）とテスト技法（HOW軸）で網羅し、仕様突合で実装と一次情報のズレを暴く。
 user-invocable: true
-allowed-tools: Bash, Read, Grep, Glob, Task, AskUserQuestion, Edit, Write
+allowed-tools: Bash, Read, Grep, Glob, Task, Agent, AskUserQuestion, Edit, Write
 argument-hint: <機能名 or 対象>
 ---
 

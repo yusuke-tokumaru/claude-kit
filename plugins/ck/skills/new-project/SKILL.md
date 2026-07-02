@@ -2,7 +2,7 @@
 name: new-project
 description: 新規プロジェクトの立ち上げ時、または CLAUDE.md・用語集がまだ整備されていないリポジトリで開発を始めるときに使用する。
 user-invocable: true
-allowed-tools: Bash, Read, Write, Edit, Grep, Glob, Task, Skill
+allowed-tools: Bash(find:*), Bash(date:*), Bash(ck skill print:*), Read, Write, Edit, Grep, Glob
 argument-hint: "[プロジェクト名]"
 ---
 

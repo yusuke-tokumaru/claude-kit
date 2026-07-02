@@ -21,12 +21,18 @@
 - **ファイル / ディレクトリのパス** → **0からモード**（Step 2-B）
 - **引数なし** → `AskUserQuestion` でどちらかを確認する（対象も尋ねる）
 
+**非対話実行（サブエージェント・自動実行などユーザーに質問できない場合)**: 引数があればモード判定どおり進める。引数なしの場合は「現在のブランチとデフォルトブランチの差分」を対象（差分モード）と**推定**して進め、推定であることを報告の冒頭に明記する。ただし現在地がデフォルトブランチ自身で差分がゼロの場合は推定が成立しないため、「レビュー対象を特定できません（PR 番号・ブランチ・パスのいずれかを指定してください）」と伝えて停止する。以降の「確認する」ステップは推奨案を採用し、置いた仮定を最終報告で列挙する。
+
 ## Step 2-A: 対象把握（差分モード）
 
 作者の意図を先に掴んでから差分を読む。
 
 1. PR/MR の description・関連 Issue を読む（`gh pr view <n>` / `glab mr show <n>` など。無ければブランチ名・コミットメッセージから意図を推定）。
-2. デフォルトブランチとの分岐点からの全変更を対象にする（複数コミットでも漏れない）:
+2. **対象の差分を取得する**。現在の HEAD が対象ブランチとは限らないため、指定方法に応じて明示的に取得する:
+   - **PR/MR 番号指定**: `gh pr checkout <n>` / `glab mr checkout <n>` で対象ブランチに切り替える（精読・tsc 検証のため checkout を優先する）。作業ツリーが汚れている等で checkout できない場合は `gh pr diff <n>` / `glab mr diff <n>` で差分のみ取得し、精読はリモート追跡ブランチ（`origin/<head>`）のファイルで行う。
+   - **ブランチ名指定**: `git switch <branch>` で切り替えるか、`git diff origin/<base>...origin/<branch>` で差分を取る。
+   - **切り替えた場合は元のブランチ名を控えておき、レビュー完了後（Step 7 の記録後）に `git switch <元のブランチ>` で必ず戻す**。ユーザーの作業状態を変えたまま終えない。**途中でエラーや中断が起きた場合も同じ**: 以降のステップが続行不能と判断した時点で、報告の前に必ず `git switch <元のブランチ>` を実行してから停止する。
+3. 対象ブランチ上にいる場合、デフォルトブランチとの分岐点からの全変更を対象にする（複数コミットでも漏れない）:
 
 ```bash
 BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
@@ -35,7 +41,7 @@ git diff --name-only "origin/${BASE:-main}...HEAD" 2>/dev/null \
   || git diff --name-only
 ```
 
-3. 差分だけでなく、変更が依存する**関連レイヤー**（呼び出し元・スキーマ・認可ヘルパー）も精読対象に含める。
+4. 差分だけでなく、変更が依存する**関連レイヤー**（呼び出し元・スキーマ・認可ヘルパー）も精読対象に含める。
 
 ## Step 2-B: 対象把握（0からモード）
 
@@ -75,7 +81,7 @@ grep -rln "pgTable\|sqliteTable\|defineTable" <対象パス>                    
 - セキュリティ: サーバー側バリデーション・機密のログ/レスポンス混入・インジェクション
 - 論理整合性: 意図と実装の一致・エッジケース（空配列・null・境界値）
 
-各指摘は「ファイル:行 / 問題 / なぜ / 直し方 / 裏取り」の形で控え、重要度は末尾の Severity Rubric で High / Med / Low に分類する。
+各指摘は「ファイル:行 / 問題 / なぜ / 直し方 / 裏取り」の形で控え、重要度は末尾の Severity Rubric で high / medium / low に分類する。
 
 ## Step 4: スタック固有レンズ（TanStack Start 系）
 
@@ -104,7 +110,10 @@ grep -rln "pgTable\|sqliteTable\|defineTable" <対象パス>                    
 **`.validator` の data が any に劣化していないかを tsc で実証**（型推論された any は `noImplicitAny` で捕捉できない）:
 
 ```ts
-// 一時ファイルに置いて `tsc --noEmit`。エラーが出たら any。
+// 検証ファイルは import 解決と tsconfig 適用のため「対象リポジトリ内」（tsconfig の include 範囲、
+// 例: src/__anycheck.tmp.ts）に置き、`npx tsc --noEmit`（プロジェクトの tsconfig が自動適用される）を実行する。
+// 検証後に必ずこのファイルを削除する — 削除までを1ステップとして扱い、対象の作業ツリーを汚したまま次に進まない。
+// エラーが出たら any。
 type IsAny<T> = 0 extends 1 & T ? true : false
 createServerFn().validator(theSchema).handler(async ({ data }) => {
   const _c: IsAny<typeof data> extends true ? 'ANY_DETECTED' : 'ok' = 'ok' // any なら代入エラー
@@ -120,7 +129,7 @@ createServerFn().validator(theSchema).handler(async ({ data }) => {
 - **根幹に high 級の疑い**: 認可・状態管理・エラー設計のいずれかに **high** の疑いがあり、自分の裏取りだけでは確信が持てない
 - **指摘が広範**: 根幹に関わる **medium が複数本**ある（単発の medium では起動しない）
 - **規模が大きい**:
-  - 差分モード — 変更行数が 200 行超（`git diff --stat "origin/${BASE:-main}...HEAD" | tail -1` の追加+削除合計）または新規機能の追加（新規ファイル）
+  - 差分モード — 変更行数が 200 行超（追加+削除合計。`BASE` は Step 2-A から持ち越せないため同一コマンド内で再取得する: `BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'); git diff --stat "origin/${BASE:-main}...HEAD" | tail -1`）または新規機能の追加（新規ファイル）
   - 0からモード — 対象ファイル数が 5 件超、または同等以上の規模（差分が無いので行数でなく規模で判断する）
 
 ## Step 7: 記録
@@ -184,9 +193,9 @@ createServerFn().validator(theSchema).handler(async ({ data }) => {
 
 | 重要度 | 基準 |
 |--------|------|
-| High | 機能不成立・認可漏れ・なりすまし・ロックアウト・お金の数字が不定 |
-| Med | 立場(role)で結果が変わる/誤集計、重複による将来の乖離、認可の手書き依存 |
-| Low | 品質・規約・型精度・UX・優先度の低い予防 |
+| high | 機能不成立・認可漏れ・なりすまし・ロックアウト・お金の数字が不定 |
+| medium | 立場(role)で結果が変わる/誤集計、重複による将来の乖離、認可の手書き依存 |
+| low | 品質・規約・型精度・UX・優先度の低い予防 |
 
 ## Common Mistakes（レビュアー自身が陥る罠）
 

@@ -7,11 +7,13 @@ Excel・PowerPoint・Word ファイルを解析してテキスト化する。
 
 `$ARGUMENTS` からファイルパスを取得する。指定がない場合はユーザーにパスを尋ねる。
 
+まずファイルの存在を確認する（`test -f "<パス>"`）。存在しない場合は「ファイルが見つかりません: <パス>」と伝えて終了する（Python の例外メッセージに頼らない）。
+
 ファイルの拡張子からファイル種別を判定する:
-- `.xlsx` → Excel（`.xls` は非対応。openpyxl が xlsx のみサポートするため）
+- `.xlsx` / `.xlsm` → Excel（openpyxl は両方読める。`.xls` は非対応 — openpyxl が旧形式をサポートしないため）
 - `.pptx` → PowerPoint
 - `.docx` → Word
-- それ以外 → 「対応していない形式です（xlsx/pptx/docx のみ。旧形式 xls は非対応）」と伝えて終了
+- それ以外 → 「対応していない形式です（xlsx/xlsm/pptx/docx のみ。旧形式 xls は非対応）」と伝えて終了
 
 ## Step 2: 実行環境を決める
 
@@ -73,18 +75,30 @@ EOF
 ```bash
 python3 - "<ファイルパス>" <<'EOF'
 from pptx import Presentation
+from pptx.enum.shapes import MSO_SHAPE_TYPE
 import sys
+
+def walk(shapes):
+    # グループ図形は再帰し、テキストに加えて表（GraphicFrame）も拾う（仕様書 PPT は表が主情報のことが多い）
+    for shape in shapes:
+        if shape.shape_type == MSO_SHAPE_TYPE.GROUP:
+            walk(shape.shapes)
+            continue
+        if shape.has_text_frame:
+            for para in shape.text_frame.paragraphs:
+                text = para.text.strip()
+                if text:
+                    print(text)
+        if getattr(shape, "has_table", False) and shape.has_table:
+            print()
+            for row in shape.table.rows:
+                print(" | ".join(cell.text.strip() for cell in row.cells))
 
 try:
     prs = Presentation(sys.argv[1])
     for i, slide in enumerate(prs.slides, 1):
         print(f"\n## スライド {i}")
-        for shape in slide.shapes:
-            if shape.has_text_frame:
-                for para in shape.text_frame.paragraphs:
-                    text = para.text.strip()
-                    if text:
-                        print(text)
+        walk(slide.shapes)
         if slide.has_notes_slide:
             notes = slide.notes_slide.notes_text_frame.text.strip()
             if notes:
@@ -100,6 +114,7 @@ EOF
 ```bash
 python3 - "<ファイルパス>" <<'EOF'
 from docx import Document
+import re
 import sys
 
 try:
@@ -107,9 +122,11 @@ try:
     for para in doc.paragraphs:
         if para.text.strip():
             style = para.style.name
-            if style.startswith("Heading"):
-                level = style.replace("Heading ", "")
-                print(f"\n{'#' * int(level)} {para.text}")
+            # 見出しスタイルは英語 "Heading 1" / 日本語 "見出し 1" の両方に対応する。
+            # レベル数字が取れないスタイル名（"Heading" 単独等）は本文として出力し、例外で全体を落とさない
+            m = re.match(r"^(?:Heading|見出し)\s*(\d+)$", style)
+            if m:
+                print(f"\n{'#' * int(m.group(1))} {para.text}")
             else:
                 print(para.text)
 
@@ -131,6 +148,8 @@ EOF
 - ファイル名
 - 種別（Excel / PowerPoint / Word）
 - 規模（シート数・行数 / スライド数 / 段落数）
+
+解析対象が**仕様書**（機能仕様・画面仕様・移行仕様など）で、内容をプロジェクトに残す必要がありそうな場合は、`/spec-import` を案内する（テキスト化結果を構造化して `specs/<機能名>.md` に取り込み、`/qa`・`/plan` の一次情報にする後工程）。本スキルは表示のみでファイルを書き込まない。
 
 ## 制約
 

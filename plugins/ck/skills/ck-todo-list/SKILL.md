@@ -2,7 +2,7 @@
 name: ck-todo-list
 description: 登録済みの TODO を確認・消化したいときに使用する。「TODO 一覧」「残タスク確認」「TODO を完了にして」と言われたとき。
 user-invocable: true
-allowed-tools: Bash(ck todo *), Read
+allowed-tools: Bash(ck todo:*)
 argument-hint: "[done <スラグ> | --all | --global]"
 ---
 
